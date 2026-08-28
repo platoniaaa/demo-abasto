@@ -285,10 +285,33 @@ table.tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;}
 .chart-svg{display:block;}
 .chart-svg text{font-family:var(--font-sans);}
 .chart-svg .axislabel{font-size:9.5px;fill:var(--text-3);}
+
+/* ---------- tutorial interactivo ---------- */
+.tour-overlay{position:fixed;inset:0;z-index:89;background:transparent;}
+.tour-spot{position:fixed;z-index:90;border-radius:8px;box-shadow:0 0 0 9999px rgba(17,14,12,.68);pointer-events:none;transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1);}
+.tour-spot::after{content:"";position:absolute;inset:-3px;border-radius:10px;border:2px solid var(--accent-500);animation:tourpulse 1.8s ease-in-out infinite;}
+@keyframes tourpulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+.tour-pop{position:fixed;z-index:91;background:var(--surface);border:1px solid var(--border-2);border-radius:8px;box-shadow:var(--shadow-lift);padding:18px 20px;width:320px;max-width:calc(100vw - 32px);}
+.tour-pop__kicker{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.tour-pop h4{font-family:var(--font-display);font-size:17px;margin-bottom:8px;}
+.tour-pop p{font-size:13.5px;color:var(--text-2);line-height:1.5;}
+.tour-pop__foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;}
+.tour-dots{display:flex;gap:5px;}
+.tour-dots span{width:5px;height:5px;border-radius:50%;background:var(--border-2);}
+.tour-dots span.on{background:var(--accent-500);width:14px;border-radius:3px;}
+.tour-center-overlay{position:fixed;inset:0;z-index:89;background:rgba(17,14,12,.6);display:flex;align-items:center;justify-content:center;padding:20px;}
+.tour-center{background:var(--surface);border-radius:10px;box-shadow:var(--shadow-lift);max-width:440px;width:100%;padding:36px 32px;text-align:center;}
+.tour-center .brandmark__badge{margin:0 auto 18px;}
+.tour-center h4{font-family:var(--font-display);font-size:24px;margin-bottom:12px;}
+.tour-center p{font-size:14.5px;color:var(--text-2);line-height:1.55;margin-bottom:24px;}
+.tour-fab{position:fixed;bottom:20px;left:20px;z-index:40;display:flex;align-items:center;gap:7px;padding:9px 14px 9px 11px;border-radius:20px;background:var(--surface);border:1px solid var(--border-2);color:var(--text-2);font-size:12.5px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-card);}
+.tour-fab:hover{border-color:var(--accent-500);color:var(--accent-700);}
+.tour-fab .ic{color:var(--accent-500);}
 </style>
 <body>
 <div id="root"></div>
 <div id="modal-root"></div>
+<div id="tour-root"></div>
 <div id="toast-root" class="toast-stack"></div>
 <script>
 // ===================== RNG determinístico (datos estables entre renders) =====================
@@ -776,6 +799,7 @@ function shellHTML(inner){
     ${STATE.notifOpen?notifPopHTML():''}
   </header>
   <main class="content">${inner}</main>
+  ${STATE.tour.active?'':`<button class="tour-fab" onclick="App.startTour()">${ic('star')} Ver tutorial</button>`}
   <button class="chatfab" onclick="App.toggleChat()">${ic(STATE.chatOpen?'x':'msg')}</button>
   ${STATE.chatOpen?chatbotHTML():''}
   `;
@@ -871,7 +895,7 @@ function viewDashboard(){
   <div class="section-title"><div><h2 class="editorial-rule">Sugerido de compras</h2><p>Reposición calculada por producto y sucursal — snapshot de hoy, ${fDate(NOW)}.</p></div>
     <div class="flex gap8">
       <button class="btn btn-outline btn-sm" onclick="App.refreshDash()">${ic('refresh')} Actualizar</button>
-      ${permisos().lectura?'':`<button class="btn btn-primary btn-sm" onclick="App.openModalSugerencia()">${ic('plus')} Sugerencia manual</button>`}
+      ${permisos().lectura?'':`<button class="btn btn-primary btn-sm" data-tour="btn-sugerencia" onclick="App.openModalSugerencia()">${ic('plus')} Sugerencia manual</button>`}
     </div>
   </div>
   ${permisos().admin?pillTabsVista():''}
@@ -886,7 +910,7 @@ function viewDashboard(){
     <button class="togglebtn ${f.soloNacional?'on':''}" onclick="App.toggleDashFlag('soloNacional')"><span class="dot"></span>Solo nacionales</button>
     <div class="toolbar-spacer"></div>
     <button class="btn btn-outline btn-sm" onclick="App.limpiarDashFiltros()" ${(!f.q&&f.soloPedir&&!f.soloNacional)?'disabled':''}>Limpiar filtros</button>
-    <button class="btn btn-outline btn-sm" onclick="App.openModalColumnas('dash')">${ic('sliders')} Columnas</button>
+    <button class="btn btn-outline btn-sm" data-tour="btn-columnas" onclick="App.openModalColumnas('dash')">${ic('sliders')} Columnas</button>
     <button class="btn btn-outline btn-sm" onclick="App.exportar('el sugerido')">${ic('download')} Exportar Excel</button>
   </div>
   <div id="dash-table">${dashTableHTML()}</div>
@@ -1615,6 +1639,7 @@ const STATE = {
   auth:false, user:null, rol:'admin', pendingRol:'admin',
   route:'#/', sidebarOpen:false, notifOpen:false, chatOpen:false, chatMsgs:[],
   tables:{}, modal:null, pedidosExtra:{},
+  tour:{active:false, step:0, visto:false},
   formSug:{modo:'individual',producto:'',sucursal:'',formaCantidad:'unidades',cantidad:1,dias:7,objetivo:0,repetir:false,cadaDias:14,vence:'',motivo:'',grupoSucursales:[],grupoProveedor:'',grupoAbc:[]},
   formInc:{titulo:'',descripcion:'',producto:'',sucursal:'',pantalla:''},
   dashboard:{q:'',soloPedir:true,soloNacional:false,vista:'todas',chartsOpen:false,cols:new Set(DASH_COLS_DEFAULT)},
@@ -1690,6 +1715,79 @@ function catalogoTableHTML(){
   return renderTable('catalogo', cols, rows, {pageSize:50, rowHref:p=>'#/catalogo/'+encodeURIComponent(p.producto)});
 }
 
+// ===================== Tutorial interactivo =====================
+const TOUR_STEPS = [
+  {kind:'intro', title:'Bienvenido a Abasto', text:'En un minuto te mostramos cómo decide, todos los días, qué comprar en cada sucursal.'},
+  {route:'#/', selector:'.kpi-grid', title:'El sugerido de hoy', text:'Cuatro números resumen la mañana: cuánto comprar, por cuánto dinero, en cuántos productos y con cuántos proveedores.'},
+  {route:'#/', selector:'.toolbar', title:'Filtra en vivo', text:'Busca por texto o activa "solo pedir" y "solo nacionales" — la tabla y los gráficos se actualizan al instante, sin recargar nada.'},
+  {route:'#/', selector:'#dash-table', title:'Cada fila, una decisión', text:'Producto y sucursal. Haz clic en cualquiera para ver el cálculo completo: demanda, stock, lead time y por qué se sugiere esa cantidad.'},
+  {route:'#/', selector:'[data-tour="btn-columnas"]', title:'Tantas columnas como necesites', text:'Más de 30 columnas disponibles — stock, márgenes, lead time — organizadas por tema. Cada usuario arma su propia vista.'},
+  {route:'#/', selector:'[data-tour="btn-sugerencia"]', title:'Cuando el criterio humano manda', text:'Un ajuste manual, con motivo y fecha de vencimiento — no una instrucción que se pierde en un chat.'},
+  {route:'#/compras', selector:'main.content .card', title:'Listo para comprar', text:'El sugerido ya agrupado por proveedor. Se revisa y se exporta como orden — sin pasar por Excel.'},
+  {route:'#/catalogo', selector:'#cat-table', title:'El maestro completo', text:'Todo el catálogo, tenga o no sugerido activo hoy. Cada producto tiene su propia ficha con historial de ventas y stock por sucursal.'},
+  {route:'#/inventario', selector:'.kpi-grid', title:'Los dos lados del problema', text:'Cuánta plata está inmovilizada en sobre-stock, y dónde hay riesgo real de quiebre — en la misma pantalla.'},
+  {route:'#/configuracion', selector:'main.content .card', title:'El motor, a tu medida', text:'Stock de seguridad, lead time, clasificación ABC — cada parámetro se puede ajustar, con el impacto medido antes de aplicar.'},
+  {route:'#/auditoria', selector:'.table-wrap', title:'Nada se pierde', text:'Quién cambió qué, cuándo y por qué. Cada ajuste manual, cada carga masiva, cada recurrente — todo con fecha y autor.'},
+  {kind:'outro', title:'Eso es Abasto', text:'Sigue explorando la demo a tu ritmo, o conversemos sobre tu operación.'},
+];
+function tourRoot(){ return document.getElementById('tour-root'); }
+function tourClear(){ const r=tourRoot(); if(r) r.innerHTML=''; }
+function tourRenderCenter(step){
+  const isOutro = step.kind==='outro';
+  tourRoot().innerHTML = `<div class="tour-center-overlay">
+    <div class="tour-center">
+      <span class="brandmark__badge" style="display:inline-flex;">AB</span>
+      <h4>${esc(step.title)}</h4>
+      <p>${esc(step.text)}</p>
+      <div class="flex gap8" style="justify-content:center;">
+        ${isOutro? `<button class="btn btn-primary" onclick="App.tourEnd()">Explorar la demo</button>`
+          : `<button class="btn btn-ghost" onclick="App.tourEnd()">Saltar</button><button class="btn btn-primary" onclick="App.tourNext()">Empezar ${ic('arrowright')}</button>`}
+      </div>
+    </div>
+  </div>`;
+}
+function tourPositionPop(rect, popEl){
+  const margin=14;
+  const popW=popEl.offsetWidth, popH=popEl.offsetHeight;
+  const spaceBelow=window.innerHeight-rect.bottom;
+  const top = spaceBelow>popH+margin+10 ? rect.bottom+margin : Math.max(margin, rect.top-popH-margin);
+  const left = Math.min(Math.max(margin, rect.left), window.innerWidth-popW-margin);
+  popEl.style.top=top+'px'; popEl.style.left=left+'px';
+}
+function tourRenderSpotlight(step, idx, total){
+  const el = document.querySelector(step.selector);
+  if(!el){ App.tourNext(); return; }
+  const big = el.getBoundingClientRect().height > window.innerHeight*0.85;
+  el.scrollIntoView(big?{block:'start'}:{block:'center'});
+  setTimeout(()=>{
+    const raw=el.getBoundingClientRect();
+    const topbar=70;
+    const rect={
+      top: Math.max(raw.top, topbar),
+      bottom: Math.min(raw.bottom, window.innerHeight-8),
+      left: Math.max(raw.left, 8),
+      right: Math.min(raw.right, window.innerWidth-8),
+    };
+    rect.width=Math.max(40, rect.right-rect.left); rect.height=Math.max(40, rect.bottom-rect.top);
+    const pad=6;
+    tourRoot().innerHTML = `<div class="tour-overlay"></div>
+      <div class="tour-spot" style="top:${(rect.top-pad).toFixed(0)}px;left:${(rect.left-pad).toFixed(0)}px;width:${(rect.width+pad*2).toFixed(0)}px;height:${(rect.height+pad*2).toFixed(0)}px;"></div>
+      <div class="tour-pop" id="tour-pop">
+        <div class="tour-pop__kicker"><span class="kicker">Paso ${idx} de ${total}</span><button class="iconbtn" style="width:22px;height:22px;" onclick="App.tourEnd()">${ic('x')}</button></div>
+        <h4>${esc(step.title)}</h4>
+        <p>${esc(step.text)}</p>
+        <div class="tour-pop__foot">
+          <div class="tour-dots">${Array.from({length:total}).map((_,i)=>`<span class="${i===idx-1?'on':''}"></span>`).join('')}</div>
+          <div class="flex gap8">
+            ${idx>1?`<button class="btn btn-ghost btn-sm" onclick="App.tourPrev()">Atrás</button>`:''}
+            <button class="btn btn-primary btn-sm" onclick="App.tourNext()">${idx===total?'Finalizar':'Siguiente'} ${ic('arrowright')}</button>
+          </div>
+        </div>
+      </div>`;
+    tourPositionPop(rect, document.getElementById('tour-pop'));
+  });
+}
+
 // ===================== App (handlers) =====================
 const App = {
   // Auth
@@ -1701,6 +1799,7 @@ const App = {
     STATE.auth=true; STATE.user=user; STATE.rol=rol;
     location.hash='#/'; render();
     showToast('Bienvenida/o, '+user.nombre.split(' ')[0]+'.');
+    if(!STATE.tour.visto) setTimeout(()=>App.startTour(), 900);
   },
   logout(){ STATE.auth=false; STATE.user=null; STATE.sidebarOpen=false; STATE.notifOpen=false; STATE.chatOpen=false; render(); },
   // Shell
@@ -1954,8 +2053,38 @@ const App = {
   },
   // Modal genérico
   closeModal(){ closeModal(); },
+  // Tutorial interactivo
+  startTour(){
+    STATE.chatOpen=false; STATE.sidebarOpen=false; STATE.notifOpen=false;
+    STATE.tour.active=true; STATE.tour.step=0; STATE.tour.visto=true;
+    render();
+    App.tourRenderCurrent();
+  },
+  tourRenderCurrent(){
+    const step=TOUR_STEPS[STATE.tour.step];
+    if(!step){ App.tourEnd(); return; }
+    if(step.kind==='intro'||step.kind==='outro'){ tourRenderCenter(step); return; }
+    if(step.route && STATE.route!==step.route){
+      location.hash=step.route;
+      setTimeout(()=>tourRenderSpotlight(step, STATE.tour.step+1, TOUR_STEPS.length), 140);
+    } else {
+      tourRenderSpotlight(step, STATE.tour.step+1, TOUR_STEPS.length);
+    }
+  },
+  tourNext(){
+    STATE.tour.step++;
+    if(STATE.tour.step>=TOUR_STEPS.length){ App.tourEnd(); return; }
+    App.tourRenderCurrent();
+  },
+  tourPrev(){ STATE.tour.step=Math.max(0,STATE.tour.step-1); App.tourRenderCurrent(); },
+  tourEnd(){ STATE.tour.active=false; tourClear(); render(); },
 };
 window.App = App;
+window.addEventListener('resize', ()=>{
+  if(!STATE.tour.active) return;
+  const step=TOUR_STEPS[STATE.tour.step];
+  if(step && step.selector) tourRenderSpotlight(step, STATE.tour.step+1, TOUR_STEPS.length);
+});
 
 // ===================== Init =====================
 window.addEventListener('hashchange', () => { STATE.modal=null; STATE.notifOpen=false; renderModal(); render(); });
