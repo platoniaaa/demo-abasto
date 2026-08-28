@@ -307,6 +307,64 @@ table.tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;}
 .tour-fab{position:fixed;bottom:20px;left:20px;z-index:40;display:flex;align-items:center;gap:7px;padding:9px 14px 9px 11px;border-radius:20px;background:var(--surface);border:1px solid var(--border-2);color:var(--text-2);font-size:12.5px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-card);}
 .tour-fab:hover{border-color:var(--accent-500);color:var(--accent-700);}
 .tour-fab .ic{color:var(--accent-500);}
+
+/* ---------- landing (pre-login) ---------- */
+.land{position:relative;z-index:1;}
+.land__nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb, var(--bg) 88%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+.land__nav .land-wrap{height:64px;display:flex;align-items:center;}
+.land__nav .land-wrap>a:last-child{margin-left:auto;}
+.land-wrap{max-width:1060px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+.land-hero{padding:64px 0 52px;}
+.land-hero__top{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;}
+@media(max-width:860px){.land-hero__top{grid-template-columns:1fr;}}
+.land-hero h1{font-size:clamp(30px,4.4vw,48px);line-height:1.07;}
+.land-hero h1 i{font-style:italic;color:var(--accent-700);}
+.land-hero__sub{margin-top:18px;font-size:16.5px;color:var(--text-2);max-width:50ch;}
+.land-hero__cta{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.land-hero__note{font-size:12px;color:var(--text-3);margin-top:10px;}
+.land-stat-panel{background:var(--surface);border:1px solid var(--border-2);border-radius:6px;box-shadow:var(--shadow-lift);padding:20px 22px;}
+.land-stat-panel .kicker{margin-bottom:14px;}
+.land-stat-panel .row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--border);}
+.land-stat-panel .row:last-child{border-bottom:none;}
+.land-stat-panel .row span:first-child{font-size:13px;color:var(--text-2);}
+.land-stat-panel .row b{font-family:var(--font-display);font-size:19px;}
+.land-section{padding:48px 0;border-top:1px solid var(--border);}
+.land-section__head{max-width:620px;margin-bottom:30px;}
+.land-section__head h2{font-size:clamp(22px,3vw,29px);}
+.land-section__head p{margin-top:10px;color:var(--text-2);font-size:15px;}
+.land-contrast{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border-2);border:1px solid var(--border-2);border-radius:6px;overflow:hidden;}
+@media(max-width:720px){.land-contrast{grid-template-columns:1fr;}}
+.land-contrast>div{background:var(--surface);padding:24px 22px;}
+.land-contrast h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:14px;font-family:var(--font-sans);}
+.land-contrast .bad h3{color:var(--text-3);}
+.land-contrast .good h3{color:var(--accent-700);}
+.land-contrast ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px;}
+.land-contrast li{font-size:14px;color:var(--text-2);padding-left:18px;position:relative;}
+.land-contrast .bad li::before{content:"×";position:absolute;left:0;color:var(--text-3);font-weight:700;}
+.land-contrast .good li::before{content:"✓";position:absolute;left:0;color:var(--accent-700);font-weight:700;}
+.land-contrast li b{color:var(--text-1);}
+.land-steps .step{display:grid;grid-template-columns:52px 1fr;gap:16px;padding:18px 0;border-top:1px solid var(--border);}
+.land-steps .step:first-child{border-top:none;}
+.land-steps .stepn{font-family:var(--font-mono);font-size:12px;color:var(--text-3);padding-top:2px;}
+.land-steps h3{font-size:16px;margin-bottom:5px;font-family:var(--font-display);font-weight:600;}
+.land-steps p{color:var(--text-2);font-size:13.5px;max-width:58ch;}
+.land-map{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border-2);border:1px solid var(--border-2);border-radius:6px;overflow:hidden;}
+@media(max-width:780px){.land-map{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.land-map{grid-template-columns:1fr;}}
+.land-map>div{background:var(--surface);padding:17px 16px;}
+.land-map .ic{color:var(--accent-500);margin-bottom:8px;}
+.land-map h4{font-size:13px;margin-bottom:3px;font-family:var(--font-sans);font-weight:600;}
+.land-map p{font-size:11.5px;color:var(--text-3);}
+.land-cta{background:var(--ink-900);color:var(--paper);border-radius:10px;padding:44px 36px;text-align:center;}
+.land-cta h2{font-size:clamp(24px,3.4vw,32px);color:inherit;font-family:var(--font-display);}
+.land-cta p{margin-top:10px;color:#d6d3ce;font-size:15px;}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .land-cta{background:var(--surface-2);border:1px solid var(--border-2);}
+  :root:not([data-theme="light"]) .land-cta p{color:var(--text-2);}
+}
+:root[data-theme="dark"] .land-cta{background:var(--surface-2);border:1px solid var(--border-2);}
+:root[data-theme="dark"] .land-cta p{color:var(--text-2);}
+.land-foot{padding:26px 0 48px;text-align:center;font-size:12px;color:var(--text-3);}
 </style>
 <body>
 <div id="root"></div>
@@ -731,6 +789,112 @@ const NAV = [
 function navItems(){ const p=permisos(); return NAV.filter(n=>(!n.onlyAdmin||p.admin)&&(!n.onlyCalibra||p.calibra)&&(!n.hideReadOnly||!p.lectura)); }
 
 // ===================== Login =====================
+// ===================== Landing (previa al login) =====================
+function viewLanding(){
+  return `<div class="land">
+    <header class="land__nav"><div class="land-wrap flex items-center">
+      <span class="brandmark"><span class="brandmark__badge">AB</span><span class="brandmark__word"><b>Abasto</b><span>reposición diaria</span></span></span>
+      <a class="btn btn-primary btn-sm" href="javascript:void(0)" onclick="App.goShowLogin()">Entrar a la demo</a>
+    </div></header>
+
+    <section class="land-hero">
+      <div class="land-wrap land-hero__top">
+        <div>
+          <p class="eyebrow kicker" style="color:var(--accent-700);margin-bottom:14px;">Para equipos de abastecimiento y supply chain</p>
+          <h1>Cada sucursal, la cantidad justa — <i>todos los días.</i></h1>
+          <p class="land-hero__sub">Abasto recalcula a diario el punto de pedido y el nivel óptimo de cada producto en cada sucursal, para que tu equipo deje de elegir entre quiebres de stock y capital de trabajo inmovilizado.</p>
+          <div class="land-hero__cta">
+            <button class="btn btn-primary" onclick="App.goShowLogin()">Entrar a la demo ${ic('arrowright')}</button>
+            <a class="btn btn-outline" href="#land-como-funciona">Ver cómo funciona</a>
+          </div>
+          <p class="land-hero__note">Demo con datos ficticios — no requiere instalación ni datos reales de tu operación.</p>
+        </div>
+        <div class="land-stat-panel">
+          <p class="kicker">Lo que vas a ver al entrar — ejemplo</p>
+          <div class="row"><span>Nivel de servicio objetivo (clase A)</span><b class="tabular">95%</b></div>
+          <div class="row"><span>Sucursales bajo gestión</span><b class="tabular">12</b></div>
+          <div class="row"><span>SKU con sugerido activo hoy</span><b class="tabular">342 u</b></div>
+          <div class="row"><span>Frecuencia de recálculo</span><b>Diaria</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="land-section">
+      <div class="land-wrap">
+        <div class="land-section__head">
+          <p class="eyebrow kicker" style="color:var(--accent-700);margin-bottom:10px;">El costo de decidir a ojo</p>
+          <h2 class="editorial-rule">Dos problemas que casi siempre pasan al mismo tiempo.</h2>
+          <p>Un quiebre es una venta perdida hoy. Un sobre-stock es plata inmovilizada todos los meses. Sin un cálculo diario por sucursal, ambos ocurren a la vez, en lugares distintos, sin que nadie lo vea a tiempo.</p>
+        </div>
+        <div class="land-contrast">
+          <div class="bad">
+            <h3>Sin un sistema</h3>
+            <ul>
+              <li>El nivel de servicio depende de que <b>una persona</b> esté disponible ese día.</li>
+              <li>El capital inmovilizado en sobre-stock <b>se descubre al cierre de mes</b>, no antes.</li>
+              <li>Los ajustes de compra no quedan registrados — <b>imposibles de auditar</b> o traspasar.</li>
+              <li>Cada sucursal decide con <b>su propio criterio</b>, en su propio Excel.</li>
+            </ul>
+          </div>
+          <div class="good">
+            <h3>Con Abasto</h3>
+            <ul>
+              <li>Punto de pedido y nivel óptimo <b>recalculados todos los días</b>, por SKU y por sucursal.</li>
+              <li>Vista consolidada de <b>dónde está la plata inmovilizada</b> y dónde hay riesgo de quiebre.</li>
+              <li>Cada ajuste manual queda <b>con motivo, autor y fecha</b> — trazable en la auditoría.</li>
+              <li>Un mismo criterio de cálculo, <b>aplicado igual</b> en las 12 sucursales.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="land-section" id="land-como-funciona">
+      <div class="land-wrap">
+        <div class="land-section__head">
+          <p class="eyebrow kicker" style="color:var(--accent-700);margin-bottom:10px;">Cómo funciona</p>
+          <h2 class="editorial-rule">De la venta de ayer a la orden de hoy.</h2>
+        </div>
+        <div class="land-steps">
+          <div class="step"><div class="stepn">01</div><div><h3>Se consolida la información</h3><p>Ventas, stock por bodega y lead time de cada proveedor, sin planillas intermedias.</p></div></div>
+          <div class="step"><div class="stepn">02</div><div><h3>El motor calcula el sugerido</h3><p>Demanda, colchón de seguridad y si conviene traer del centro de distribución o comprar directo — por producto y por sucursal.</p></div></div>
+          <div class="step"><div class="stepn">03</div><div><h3>Tu equipo revisa y ajusta</h3><p>Se filtra, se ajusta cuando el criterio humano tiene algo que decir, y se generan los carros de compra por proveedor.</p></div></div>
+          <div class="step"><div class="stepn">04</div><div><h3>Queda todo registrado</h3><p>Qué se pidió, quién lo decidió y por qué — disponible para auditoría el mismo día o dentro de un año.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="land-section">
+      <div class="land-wrap">
+        <div class="land-section__head">
+          <p class="eyebrow kicker" style="color:var(--accent-700);margin-bottom:10px;">Antes de entrar</p>
+          <h2 class="editorial-rule">Lo que vas a poder explorar.</h2>
+        </div>
+        <div class="land-map">
+          <div>${ic('chart')}<h4>Sugerido diario</h4><p>Qué comprar, cuánto y en qué sucursal.</p></div>
+          <div>${ic('cart')}<h4>Compras por proveedor</h4><p>El sugerido, listo para transformarse en orden.</p></div>
+          <div>${ic('layers')}<h4>Salud del inventario</h4><p>Dónde está la plata inmovilizada y el riesgo de quiebre.</p></div>
+          <div>${ic('flask')}<h4>Simulador de políticas</h4><p>Prueba otro stock de seguridad antes de aplicarlo.</p></div>
+          <div>${ic('file')}<h4>Auditoría completa</h4><p>Quién cambió qué, cuándo y por qué.</p></div>
+          <div>${ic('lock')}<h4>Roles y permisos</h4><p>Administrador, Abastecimiento o Solo lectura.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="land-section">
+      <div class="land-wrap">
+        <div class="land-cta">
+          <h2>Entra y recorre el flujo completo.</h2>
+          <p>Vas a poder elegir tu rol — Administrador, Abastecimiento o Solo lectura — para ver los permisos en acción. Un tutorial guiado te muestra cada pantalla.</p>
+          <div style="margin-top:22px;"><button class="btn btn-primary" style="background:var(--accent-500);color:var(--ink-900);" onclick="App.goShowLogin()">Entrar a la demo ${ic('arrowright')}</button></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="land-foot">Abasto — demo de producto, datos ficticios.</footer>
+  </div>`;
+}
+
 function viewLogin(){
   return `<div class="login-wrap">
     <div class="login-left">
@@ -745,6 +909,7 @@ function viewLogin(){
     </div>
     <div class="login-right">
       <div class="login-card">
+        <button class="btn btn-ghost btn-sm" style="margin-bottom:14px;padding-left:0;" onclick="App.backToLanding()">← Volver</button>
         <h3>Ingresa a tu cuenta</h3>
         <p class="hint">${esc(EMPRESA.nombre)} — datos de demostración</p>
         <div id="login-error"></div>
@@ -1636,7 +1801,7 @@ function modalColumnasHTML(which){
 
 // ===================== Estado global =====================
 const STATE = {
-  auth:false, user:null, rol:'admin', pendingRol:'admin',
+  auth:false, showLogin:false, user:null, rol:'admin', pendingRol:'admin',
   route:'#/', sidebarOpen:false, notifOpen:false, chatOpen:false, chatMsgs:[],
   tables:{}, modal:null, pedidosExtra:{},
   tour:{active:false, step:0, visto:false},
@@ -1695,7 +1860,7 @@ function contentForRoute(){
 }
 function render(){
   const root=document.getElementById('root');
-  if(!STATE.auth){ root.innerHTML=viewLogin(); return; }
+  if(!STATE.auth){ root.innerHTML = STATE.showLogin ? viewLogin() : viewLanding(); return; }
   root.innerHTML = shellHTML(contentForRoute());
 }
 
@@ -1792,6 +1957,8 @@ function tourRenderSpotlight(step, idx, total){
 const App = {
   // Auth
   setLoginRol(r){ STATE.pendingRol=r; },
+  goShowLogin(){ STATE.showLogin=true; render(); window.scrollTo(0,0); },
+  backToLanding(){ STATE.showLogin=false; render(); window.scrollTo(0,0); },
   login(){
     const email=(document.getElementById('login-email').value||'').trim().toLowerCase();
     const rol=STATE.pendingRol||'admin';
