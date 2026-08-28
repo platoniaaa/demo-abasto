@@ -348,9 +348,10 @@ table.tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;}
 .land-steps .stepn{font-family:var(--font-mono);font-size:12px;color:var(--text-3);padding-top:2px;}
 .land-steps h3{font-size:16px;margin-bottom:5px;font-family:var(--font-display);font-weight:600;}
 .land-steps p{color:var(--text-2);font-size:13.5px;max-width:58ch;}
-.land-map{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border-2);border:1px solid var(--border-2);border-radius:6px;overflow:hidden;}
-@media(max-width:780px){.land-map{grid-template-columns:1fr 1fr;}}
-@media(max-width:520px){.land-map{grid-template-columns:1fr;}}
+.land-map{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border-2);border:1px solid var(--border-2);border-radius:6px;overflow:hidden;}
+@media(max-width:900px){.land-map{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:660px){.land-map{grid-template-columns:1fr 1fr;}}
+@media(max-width:420px){.land-map{grid-template-columns:1fr;}}
 .land-map>div{background:var(--surface);padding:17px 16px;}
 .land-map .ic{color:var(--accent-500);margin-bottom:8px;}
 .land-map h4{font-size:13px;margin-bottom:3px;font-family:var(--font-sans);font-weight:600;}
@@ -448,11 +449,11 @@ const PRODUCTOS = PRODUCTOS_BASE.map((p,i)=>{
 PRODUCTOS.forEach((p,i)=>{ if(p.reemplazo==='—rep—'){ const cand=PRODUCTOS.filter(x=>x.categoria===p.categoria && x!==p); p.reemplazo = cand.length? pick(cand).codigo : null; } });
 
 const USUARIOS = [
-  {nombre:'Marcela Soto', email:'msoto@rumborepuestos.cl', rol:'admin'},
-  {nombre:'Andrés Pino', email:'apino@rumborepuestos.cl', rol:'abastecimiento'},
-  {nombre:'Camila Reyes', email:'creyes@rumborepuestos.cl', rol:'abastecimiento'},
-  {nombre:'Jorge Tapia', email:'jtapia@rumborepuestos.cl', rol:'lectura'},
-  {nombre:'Fernanda Ulloa', email:'fulloa@rumborepuestos.cl', rol:'lectura'},
+  {nombre:'Marcela Soto', email:'msoto@rumborepuestos.cl', rol:'admin', sucursalesPermitidas:null},
+  {nombre:'Andrés Pino', email:'apino@rumborepuestos.cl', rol:'abastecimiento', sucursalesPermitidas:null},
+  {nombre:'Camila Reyes', email:'creyes@rumborepuestos.cl', rol:'abastecimiento', sucursalesPermitidas:null},
+  {nombre:'Jorge Tapia', email:'jtapia@rumborepuestos.cl', rol:'lectura', sucursalesPermitidas:['ALT','POR']},
+  {nombre:'Fernanda Ulloa', email:'fulloa@rumborepuestos.cl', rol:'lectura', sucursalesPermitidas:null},
 ];
 
 // ===================== Sugerido (producto × sucursal) =====================
@@ -871,12 +872,22 @@ function viewLanding(){
           <h2 class="editorial-rule">Lo que vas a poder explorar.</h2>
         </div>
         <div class="land-map">
-          <div>${ic('chart')}<h4>Sugerido diario</h4><p>Qué comprar, cuánto y en qué sucursal.</p></div>
-          <div>${ic('cart')}<h4>Compras por proveedor</h4><p>El sugerido, listo para transformarse en orden.</p></div>
+          <div>${ic('chart')}<h4>Sugerido diario</h4><p>Qué comprar, cuánto y en qué sucursal, con más de 30 columnas configurables.</p></div>
+          <div>${ic('cart')}<h4>Compras por proveedor</h4><p>El sugerido, agrupado y listo para transformarse en orden.</p></div>
+          <div>${ic('book')}<h4>Catálogo y ficha de producto</h4><p>Historial de ventas y stock por sucursal, producto por producto.</p></div>
+          <div>${ic('clipboard')}<h4>Sugerencias manuales</h4><p>Ajustes únicos, cargas masivas y reglas recurrentes, con motivo y autor.</p></div>
+          <div>${ic('history')}<h4>Ventas históricas</h4><p>Consulta por producto, sucursal y rango de fechas.</p></div>
           <div>${ic('layers')}<h4>Salud del inventario</h4><p>Dónde está la plata inmovilizada y el riesgo de quiebre.</p></div>
           <div>${ic('flask')}<h4>Simulador de políticas</h4><p>Prueba otro stock de seguridad antes de aplicarlo.</p></div>
+          <div>${ic('alert')}<h4>Mesa de incidencias</h4><p>Reporta y resuelve dudas sobre un cálculo puntual.</p></div>
           <div>${ic('file')}<h4>Auditoría completa</h4><p>Quién cambió qué, cuándo y por qué.</p></div>
-          <div>${ic('lock')}<h4>Roles y permisos</h4><p>Administrador, Abastecimiento o Solo lectura.</p></div>
+          <div>${ic('info')}<h4>Documentación del modelo</h4><p>Cómo se calcula cada fórmula, sin cajas negras.</p></div>
+          <div>${ic('sliders')}<h4>Calibración del modelo</h4><p>Ajusta los parámetros del motor, con el impacto medido antes de aplicar.</p></div>
+          <div>${ic('database')}<h4>Carga de datos</h4><p>Sincronización diaria automática, o carga manual de respaldo.</p></div>
+          <div>${ic('lock')}<h4>Roles y permisos</h4><p>Administrador, Abastecimiento o Solo lectura — incluso por sucursal.</p></div>
+          <div>${ic('msg')}<h4>Asistente con IA</h4><p>Pregunta por stock, ranking o precios en lenguaje natural.</p></div>
+          <div>${ic('bell')}<h4>Notificaciones de equipo</h4><p>Avisa de cargas, ajustes e incidencias en tiempo real.</p></div>
+          <div>${ic('star')}<h4>Tutorial guiado</h4><p>Un recorrido paso a paso por toda la plataforma.</p></div>
         </div>
       </div>
     </section>
@@ -956,6 +967,7 @@ function shellHTML(inner){
       <button class="brandmark" onclick="App.goto('#/')"><span class="brandmark__badge">AB</span><span class="brandmark__word"><b>Abasto</b><span>reposición diaria</span></span></button>
       <div class="topbar__right">
         <span class="syncpill">${ic('dot')} Actualizado hace 2 h</span>
+        ${STATE.user.sucursalesPermitidas?`<span class="badge badge-info" title="Este usuario solo ve estas sucursales">${ic('pin')} ${sucursalesVisibles().map(s=>s.nombre).join(', ')}</span>`:''}
         <button class="iconbtn" style="position:relative" onclick="App.toggleNotif(event)">${ic('bell')}${INCIDENCIAS.filter(i=>i.estado==='abierta').length?`<span style="position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--critical)"></span>`:''}</button>
         <span class="userchip">${esc(STATE.user.nombre)}</span>
         <button class="iconbtn" onclick="App.logout()" title="Cerrar sesión">${ic('logout')}</button>
@@ -970,15 +982,20 @@ function shellHTML(inner){
   `;
 }
 function labelRol(r){ return {admin:'Administrador',abastecimiento:'Abastecimiento',lectura:'Solo lectura'}[r]||r; }
+const NOTIF_ACCION_TXT={'Creó':'Creó una sugerencia manual','Modificó':'Modificó una sugerencia','Eliminó':'Eliminó una sugerencia','Carga masiva':'Cargó un lote masivo','Recurrencia+':'Creó una regla recurrente','Recurrencia-':'Eliminó una regla recurrente','Recurrente auto':'Se ejecutó una recurrente','Documento+':'Agregó un documento','Abrió documento':'Abrió un documento'};
 function notifPopHTML(){
-  const abiertas = INCIDENCIAS.filter(i=>i.estado==='abierta').slice(0,5);
+  const items=[
+    ...INCIDENCIAS.filter(i=>i.estado==='abierta'||i.estado==='revision').map(i=>({fecha:i.fecha, critica:true, titulo:(i.estado==='abierta'?'Nuevo reporte: ':'En revisión: ')+i.titulo, detalle:i.sucursal})),
+    ...AUDITORIA.filter(a=>sucursalPermitida(SUCURSALES.find(s=>s.nombre===a.sucursal)?.id||'')).slice(0,25).map(a=>({fecha:a.fecha, critica:false, titulo:(NOTIF_ACCION_TXT[a.accion]||a.accion)+' — '+a.producto, detalle:a.usuario+' · '+a.sucursal})),
+  ].sort((a,b)=>b.fecha-a.fecha).slice(0,6);
   return `<div class="notif-pop">
-    ${abiertas.length?abiertas.map(i=>`<div class="notif-item"><span class="notif-dot"></span><div><div>${esc(i.titulo)}</div><div class="muted small">${esc(i.sucursal)} · ${fRel(i.fecha)}</div></div></div>`).join('')
+    <div class="notif-item" style="background:var(--surface-2);"><span class="kicker" style="margin:0;">Notificaciones de equipo</span></div>
+    ${items.length?items.map(n=>`<div class="notif-item"><span class="notif-dot" style="background:${n.critica?'var(--critical)':'var(--accent-500)'}"></span><div><div>${esc(n.titulo)}</div><div class="muted small">${esc(n.detalle)} · ${fRel(n.fecha)}</div></div></div>`).join('')
       : `<div class="notif-item">Sin notificaciones pendientes.</div>`}
     <div class="notif-item" style="justify-content:center"><a href="#/auditoria" onclick="App.closeNotif()" style="color:var(--brand);font-weight:600;text-decoration:none;">Ver auditoría completa →</a></div>
   </div>`;
 }
-const CHAT_SUGERENCIAS = ['¿Por qué el sugerido de Pastilla de freno delantera en Altavista es tan alto?','¿Qué productos tienen quiebre de stock hoy?','¿Cuánto llevamos comprado este mes a Bosch?','Explícame la regla InStock'];
+const CHAT_SUGERENCIAS = ['¿Cuál es el ranking de mayor sugerido hoy?','¿Qué productos tienen quiebre de stock hoy?','¿Cuánto llevamos comprado este mes a Bosch?','Explícame la regla InStock'];
 function chatbotHTML(){
   return `<div class="chatpanel">
     <div class="chatpanel__head"><b>Asistente de abastecimiento</b><button class="iconbtn" style="color:#fff" onclick="App.toggleChat()">${ic('x')}</button></div>
@@ -1041,6 +1058,7 @@ const CAT_COLS_DEFAULT = [];
 function dashFilteredRows(){
   const f=STATE.dashboard;
   return SUGERIDO.filter(r=>{
+    if(!sucursalPermitida(r.sucursal)) return false;
     if(f.soloPedir && !r.pedir) return false;
     if(f.soloNacional && !r.nacional) return false;
     if(f.q){ const q=f.q.toLowerCase(); if(!(r.producto.toLowerCase().includes(q)||r.descripcion.toLowerCase().includes(q)||r.marca.toLowerCase().includes(q)||r.sucursalNombre.toLowerCase().includes(q))) return false; }
@@ -1119,7 +1137,7 @@ function dashTableHTML(){
 
 // ===================== Vista: Compras (carros por proveedor) =====================
 function viewCompras(){
-  const rows=SUGERIDO.filter(r=>r.pedir);
+  const rows=SUGERIDO.filter(r=>r.pedir && sucursalPermitida(r.sucursal));
   const porProveedor={};
   rows.forEach(r=>{ (porProveedor[r.proveedor]=porProveedor[r.proveedor]||[]).push(r); });
   const carros=Object.entries(porProveedor).map(([prov,items])=>({proveedor:prov, items, unidades:items.reduce((a,r)=>a+r.sugeridoTotal,0), total:items.reduce((a,r)=>a+r.valorTotal,0)})).sort((a,b)=>b.total-a.total);
@@ -1182,7 +1200,7 @@ const ALL_MANUALES = SUG_INDIVIDUALES.concat(LOTES.flatMap(l=>l.filas));
 // ===================== Vista: Catálogo =====================
 function catalogoRows(){
   const map={};
-  SUGERIDO.forEach(r=>{ if(!map[r.producto]) map[r.producto]={producto:r.producto, descripcion:r.descripcion, categoria:r.categoria, marca:r.marca, nacional:r.nacional, costo:r.costoUnitario, stockTotal:0}; map[r.producto].stockTotal+=r.stockActivo; });
+  SUGERIDO.filter(r=>sucursalPermitida(r.sucursal)).forEach(r=>{ if(!map[r.producto]) map[r.producto]={producto:r.producto, descripcion:r.descripcion, categoria:r.categoria, marca:r.marca, nacional:r.nacional, costo:r.costoUnitario, stockTotal:0}; map[r.producto].stockTotal+=r.stockActivo; });
   return Object.values(map);
 }
 function viewCatalogo(){
@@ -1204,7 +1222,7 @@ function viewCatalogo(){
   <div id="cat-table">${catalogoTableHTML()}</div>`;
 }
 function viewCatalogoDetalle(codigo){
-  const filas=SUGERIDO.filter(r=>r.producto===codigo);
+  const filas=SUGERIDO.filter(r=>r.producto===codigo && sucursalPermitida(r.sucursal));
   if(!filas.length) return `<p>Producto no encontrado. <a href="#/catalogo">← Volver al catálogo</a></p>`;
   const b=filas[0];
   const prod=PRODUCTOS.find(p=>p.codigo===codigo);
@@ -1235,6 +1253,7 @@ function viewCatalogoDetalle(codigo){
 
 // ===================== Vista: Detalle de sugerido (producto × sucursal) =====================
 function viewProductoDetalle(codigo, sucId){
+  if(!sucursalPermitida(sucId)) return viewNoAutorizado();
   const row=SUGERIDO.find(r=>r.producto===codigo && r.sucursal===sucId);
   if(!row) return `<p>No se encontró el sugerido para este producto en esta sucursal. <a href="#/">← Volver</a></p>`;
   const prod=PRODUCTOS.find(p=>p.codigo===codigo);
@@ -1390,7 +1409,7 @@ function sugRecurrentesHTML(){
 // ===================== Vista: Inventario =====================
 function inventarioAgg(){
   const bySuc={};
-  SUCURSALES.forEach(s=>{ bySuc[s.id]={sucursal:s.nombre,valor:0,inmovilizado:0,sobreStock:0,quiebres:0,bajoPP:0,productos:0}; });
+  sucursalesVisibles().forEach(s=>{ bySuc[s.id]={sucursal:s.nombre,valor:0,inmovilizado:0,sobreStock:0,quiebres:0,bajoPP:0,productos:0}; });
   SUGERIDO.forEach(r=>{
     const b=bySuc[r.sucursal]; if(!b) return;
     b.valor += r.stockActivo*r.costoUnitario; b.productos++;
@@ -1404,10 +1423,10 @@ function viewInventario(){
   const agg=inventarioAgg();
   const valorTotal=agg.reduce((a,b)=>a+b.valor,0), inmovilizado=agg.reduce((a,b)=>a+b.inmovilizado,0);
   const sobreStock=agg.reduce((a,b)=>a+b.sobreStock,0), quiebres=agg.reduce((a,b)=>a+b.quiebres,0), bajoPP=agg.reduce((a,b)=>a+b.bajoPP,0);
-  const coberturas=SUGERIDO.filter(r=>r.demandaDiaria>0).map(r=>r.stockActivo/r.demandaDiaria).sort((a,b)=>a-b);
+  const coberturas=SUGERIDO.filter(r=>r.demandaDiaria>0 && sucursalPermitida(r.sucursal)).map(r=>r.stockActivo/r.demandaDiaria).sort((a,b)=>a-b);
   const mediana=coberturas.length?coberturas[Math.floor(coberturas.length/2)]:0;
   const top10=agg.slice().sort((a,b)=>b.inmovilizado-a.inmovilizado).slice(0,10).map(b=>({label:b.sucursal,value:b.inmovilizado}));
-  const topInmovilizado=SUGERIDO.filter(r=>r.stockActivo>r.nivelMaximo*1.3).map(r=>({producto:r.producto,descripcion:r.descripcion,sucursalNombre:r.sucursalNombre,unidades:r.stockActivo-r.nivelMaximo,valor:(r.stockActivo-r.nivelMaximo)*r.costoUnitario})).sort((a,b)=>b.valor-a.valor).slice(0,30);
+  const topInmovilizado=SUGERIDO.filter(r=>r.stockActivo>r.nivelMaximo*1.3 && sucursalPermitida(r.sucursal)).map(r=>({producto:r.producto,descripcion:r.descripcion,sucursalNombre:r.sucursalNombre,unidades:r.stockActivo-r.nivelMaximo,valor:(r.stockActivo-r.nivelMaximo)*r.costoUnitario})).sort((a,b)=>b.valor-a.valor).slice(0,30);
   return `
   <div class="section-title"><div><h2 class="editorial-rule">Salud del inventario</h2><p>Dónde está la plata detenida y dónde falta stock.</p></div>
     <div class="flex gap8 items-center">
@@ -1441,7 +1460,7 @@ function viewVentas(){
   <div class="section-title"><div><h2 class="editorial-rule">Ventas históricas</h2><p>Consulta desde 2018 — ${fNum(48200+SUGERIDO.length*37)} registros disponibles.</p></div></div>
   <div class="toolbar">
     <div class="field"><label>Producto</label><input class="input" id="vh-producto" placeholder="Código o descripción" value="${esc(f.producto)}"/></div>
-    <div class="field"><label>Sucursal</label><select class="select" id="vh-sucursal"><option value="">Todas</option>${SUCURSALES.filter(s=>!s.cd).map(s=>`<option value="${s.id}" ${f.sucursal===s.id?'selected':''}>${s.nombre}</option>`).join('')}</select></div>
+    <div class="field"><label>Sucursal</label><select class="select" id="vh-sucursal"><option value="">Todas</option>${sucursalesVisibles().filter(s=>!s.cd).map(s=>`<option value="${s.id}" ${f.sucursal===s.id?'selected':''}>${s.nombre}</option>`).join('')}</select></div>
     <div class="field"><label>Desde</label><input class="input" id="vh-desde" placeholder="AAAAMM" style="width:100px" value="${esc(f.desde||'')}"/></div>
     <div class="field"><label>Hasta</label><input class="input" id="vh-hasta" placeholder="AAAAMM" style="width:100px" value="${esc(f.hasta||'')}"/></div>
     <div class="field"><label>&nbsp;</label><button class="btn btn-primary" onclick="App.consultarVentas()">Consultar</button></div>
@@ -1716,7 +1735,7 @@ function viewModelo(){
 function modalSugerenciaHTML(){
   const f=STATE.formSug;
   const prodOptions=PRODUCTOS.map(p=>`<option value="${p.codigo}" ${f.producto===p.codigo?'selected':''}>${p.codigo} — ${esc(p.descripcion)}</option>`).join('');
-  const sucOptions=SUCURSALES.filter(s=>!s.cd).map(s=>`<option value="${s.id}" ${f.sucursal===s.id?'selected':''}>${esc(s.nombre)}</option>`).join('');
+  const sucOptions=sucursalesVisibles().filter(s=>!s.cd).map(s=>`<option value="${s.id}" ${f.sucursal===s.id?'selected':''}>${esc(s.nombre)}</option>`).join('');
   const row=SUGERIDO.find(r=>r.producto===f.producto&&r.sucursal===f.sucursal);
   let previewTexto='Selecciona un producto y una sucursal para ver la previsualización.';
   if(f.modo==='individual'&&row){
@@ -1742,7 +1761,7 @@ function modalSugerenciaHTML(){
       <div class="field"><label>Producto</label><select class="select" onchange="App.setFormSug('producto',this.value)"><option value="">Selecciona…</option>${prodOptions}</select></div>
       <div class="field"><label>Sucursal</label><select class="select" onchange="App.setFormSug('sucursal',this.value)"><option value="">Selecciona…</option>${sucOptions}</select></div>
     </div>`:`<div class="modal-grid" style="margin-bottom:14px;">
-      <div class="field"><label>Sucursales (vacío = todas)</label><select class="select" multiple size="4" onchange="App.setFormSugMulti('grupoSucursales',this)">${SUCURSALES.filter(s=>!s.cd).map(s=>`<option value="${s.id}" ${f.grupoSucursales.includes(s.id)?'selected':''}>${esc(s.nombre)}</option>`).join('')}</select></div>
+      <div class="field"><label>Sucursales (vacío = todas)</label><select class="select" multiple size="4" onchange="App.setFormSugMulti('grupoSucursales',this)">${sucursalesVisibles().filter(s=>!s.cd).map(s=>`<option value="${s.id}" ${f.grupoSucursales.includes(s.id)?'selected':''}>${esc(s.nombre)}</option>`).join('')}</select></div>
       <div class="field"><label>Proveedor</label><select class="select" onchange="App.setFormSug('grupoProveedor',this.value)"><option value="">Todos</option>${[...new Set(PRODUCTOS.map(p=>p.marca))].map(m=>`<option value="${m}" ${f.grupoProveedor===m?'selected':''}>${esc(m)}</option>`).join('')}</select></div>
     </div>`}
     <div class="field" style="margin-bottom:14px;"><label>Forma de cantidad</label>
@@ -1819,6 +1838,8 @@ const STATE = {
   cargar:{estadoSync:'ok', resultado:null, motorAbierto:false},
 };
 function permisos(){ const r=STATE.rol; return { admin:r==='admin', calibra:r==='admin'||r==='abastecimiento', lectura:r==='lectura' }; }
+function sucursalesVisibles(){ const p=STATE.user&&STATE.user.sucursalesPermitidas; return p ? SUCURSALES.filter(s=>p.includes(s.id)) : SUCURSALES; }
+function sucursalPermitida(id){ const p=STATE.user&&STATE.user.sucursalesPermitidas; return !p || p.includes(id); }
 
 // ===================== Router =====================
 function parseRoute(){
@@ -1956,7 +1977,12 @@ function tourRenderSpotlight(step, idx, total){
 // ===================== App (handlers) =====================
 const App = {
   // Auth
-  setLoginRol(r){ STATE.pendingRol=r; },
+  setLoginRol(r){
+    STATE.pendingRol=r;
+    const u=USUARIOS.find(x=>x.rol===r);
+    const emailInput=document.getElementById('login-email');
+    if(u && emailInput) emailInput.value=u.email;
+  },
   goShowLogin(){ STATE.showLogin=true; render(); window.scrollTo(0,0); },
   backToLanding(){ STATE.showLogin=false; render(); window.scrollTo(0,0); },
   login(){
@@ -1986,11 +2012,39 @@ const App = {
   chatSend(){ const inp=document.getElementById('chat-input'); if(!inp) return; const q=inp.value.trim(); if(!q) return; App.chatAsk(q); },
   chatRespuesta(q){
     const ql=q.toLowerCase();
+    const codeMatch=q.match(/\d{1,2}\s?\d{6,9}/);
+    const norm=s=>s.replace(/\s/g,'');
+    const prodByCode = codeMatch ? PRODUCTOS.find(p=>norm(p.codigo).includes(norm(codeMatch[0]))) : null;
+    const prodByText = !prodByCode ? PRODUCTOS.find(p=>p.descripcion.toLowerCase().split(' ').some(w=>w.length>4 && ql.includes(w))) : null;
+    const prod = prodByCode || prodByText;
+
     if(ql.includes('instock')) return 'InStock obliga a mantener al menos 2 unidades de los repuestos de pauta de '+VEHICULOS.map(v=>v.marca).join(' y ')+' en cada sucursal con taller, sin importar el cálculo estadístico normal.';
-    if(ql.includes('quiebre')) return 'Ahora mismo hay '+SUGERIDO.filter(r=>r.stockActivo+r.stockTransito<=0&&r.demandaMensual>0).length+' líneas en quiebre con demanda activa. Revisa Inventario para el detalle por sucursal.';
-    if(ql.includes('bosch')) return 'Este mes el sugerido a Bosch suma '+fCLP(SUGERIDO.filter(r=>r.proveedor==='Bosch'&&r.pedir).reduce((a,r)=>a+r.valorTotal,0))+' en '+SUGERIDO.filter(r=>r.proveedor==='Bosch'&&r.pedir).length+' líneas.';
+    if(ql.includes('quiebre')) return 'Ahora mismo hay '+SUGERIDO.filter(r=>r.stockActivo+r.stockTransito<=0&&r.demandaMensual>0&&sucursalPermitida(r.sucursal)).length+' líneas en quiebre con demanda activa (dentro de lo que puedes ver). Revisa Inventario para el detalle por sucursal.';
+    if(ql.includes('ranking')||ql.includes('top')||ql.includes('mayores')){
+      const top=SUGERIDO.filter(r=>r.pedir&&sucursalPermitida(r.sucursal)).sort((a,b)=>b.valorTotal-a.valorTotal).slice(0,3);
+      if(!top.length) return 'No hay líneas con sugerido activo para armar un ranking ahora mismo.';
+      return 'Los 3 productos con mayor valor sugerido hoy: '+top.map(r=>`${r.producto} (${r.descripcion}) en ${r.sucursalNombre} — ${fCLP(r.valorTotal)}`).join('; ')+'.';
+    }
+    if(prod){
+      const filas=SUGERIDO.filter(r=>r.producto===prod.codigo&&sucursalPermitida(r.sucursal));
+      if(!filas.length) return `${prod.codigo} existe en el catálogo, pero no en las sucursales que puedes ver.`;
+      const stockTotal=filas.reduce((a,r)=>a+r.stockActivo,0);
+      const sugTotal=filas.reduce((a,r)=>a+r.sugeridoTotal,0);
+      if(ql.includes('precio')||ql.includes('ford')||ql.includes('margen')||ql.includes('flota')){
+        const conPrecio=filas.find(r=>r.precioPublico);
+        if(conPrecio) return `${prod.codigo} (${prod.descripcion}): precio público ${fCLP(conPrecio.precioPublico)}, flota ${fCLP(conPrecio.precioFlota)}, margen ${fPct(conPrecio.margenPct)}.`;
+        return `${prod.codigo} no tiene lista de precios de flota — no es un repuesto de pauta.`;
+      }
+      if(ql.includes('venta')||ql.includes('histor')){
+        const serie=serieVentas(prod.codigo,null).slice(-3);
+        return `Ventas de ${prod.codigo} en los últimos 3 meses: `+serie.map(s=>`${s.label} ${s.value} u`).join(', ')+'.';
+      }
+      return `${prod.codigo} (${prod.descripcion}): stock activo ${fNum(stockTotal)} u, sugerido hoy ${fNum(sugTotal)} u, en ${filas.length} sucursal(es) que puedes ver.`;
+    }
+    if(ql.includes('bosch')) return 'Este mes el sugerido a Bosch suma '+fCLP(SUGERIDO.filter(r=>r.proveedor==='Bosch'&&r.pedir&&sucursalPermitida(r.sucursal)).reduce((a,r)=>a+r.valorTotal,0))+' en '+SUGERIDO.filter(r=>r.proveedor==='Bosch'&&r.pedir&&sucursalPermitida(r.sucursal)).length+' líneas.';
+    if(ql.includes('manual')||ql.includes('vigente')) return 'Hay '+ALL_MANUALES.length+' sugerencias manuales vigentes y '+RECURRENTES.length+' reglas recurrentes activas.';
     if(ql.includes('alto')||ql.includes('por qué')||ql.includes('por que')) return 'El sugerido sube cuando el stock cae bajo el punto de pedido, la demanda reciente creció, o aplica la regla InStock. Revisa la ficha del producto para ver el desglose exacto.';
-    return 'Esta es una respuesta de demostración: en la versión real, el asistente consulta el sugerido en vivo con el contexto de la pantalla donde estás.';
+    return 'No encontré esa consulta en esta demo — en la versión real, el asistente consulta la base en vivo con más de una decena de herramientas (stock, ranking, histórico, precios FORD, sugerencias vigentes, etc.). Prueba con un código o nombre de producto, o una de las sugerencias de arriba.';
   },
   // Dashboard
   setDashFiltro(k,v){ STATE.dashboard[k]=v; if(STATE.tables.dash) STATE.tables.dash.page=1; App.updateDash(); },
@@ -2107,7 +2161,7 @@ const App = {
     let prods=PRODUCTOS.filter(p=>!prodQ||p.codigo.toLowerCase().includes(prodQ)||p.descripcion.toLowerCase().includes(prodQ));
     prods = prodQ? prods.slice(0,15) : prods.slice(0,6);
     if(!prods.length){ showToast('No se encontraron productos con ese criterio.','err'); return; }
-    const sucs = sucId? [SUC_BY_ID[sucId]] : SUCURSALES.filter(s=>!s.cd);
+    const sucs = sucId? [SUC_BY_ID[sucId]] : sucursalesVisibles().filter(s=>!s.cd);
     const serieMap={}, sucMap={}, detalle=[];
     prods.forEach(p=>{ sucs.forEach(s=>{
       serieVentas(p.codigo,s.id).filter(pt=>(!desde||String(pt.periodo)>=desde)&&(!hasta||String(pt.periodo)<=hasta)).forEach(pt=>{
