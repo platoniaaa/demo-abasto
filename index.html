@@ -356,6 +356,11 @@ table.tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;}
 .land-map .ic{color:var(--accent-500);margin-bottom:8px;}
 .land-map h4{font-size:13px;margin-bottom:3px;font-family:var(--font-sans);font-weight:600;}
 .land-map p{font-size:11.5px;color:var(--text-3);}
+.land-who{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media(max-width:780px){.land-who{grid-template-columns:1fr;}}
+.land-who>div{border-left:2px solid var(--accent-700);padding-left:16px;}
+.land-who h3{font-size:15.5px;margin-bottom:6px;font-family:var(--font-sans);font-weight:700;}
+.land-who p{font-size:13.5px;color:var(--text-2);}
 .land-cta{background:var(--ink-900);color:var(--paper);border-radius:10px;padding:44px 36px;text-align:center;}
 .land-cta h2{font-size:clamp(24px,3.4vw,32px);color:inherit;font-family:var(--font-display);}
 .land-cta p{margin-top:10px;color:#d6d3ce;font-size:15px;}
@@ -454,6 +459,7 @@ const USUARIOS = [
   {nombre:'Camila Reyes', email:'creyes@rumborepuestos.cl', rol:'abastecimiento', sucursalesPermitidas:null},
   {nombre:'Jorge Tapia', email:'jtapia@rumborepuestos.cl', rol:'lectura', sucursalesPermitidas:['ALT','POR']},
   {nombre:'Fernanda Ulloa', email:'fulloa@rumborepuestos.cl', rol:'lectura', sucursalesPermitidas:null},
+  {nombre:'Pablo Rivas', email:'privas@rumborepuestos.cl', rol:'vendedor', sucursalesPermitidas:['ALT']},
 ];
 
 // ===================== Sugerido (producto × sucursal) =====================
@@ -546,6 +552,24 @@ const INCIDENCIAS = Array.from({length:9}).map((_,i)=>{
   };
 });
 
+// ===================== Solicitudes de sucursal (vendedor → abastecimiento) =====================
+const MOTIVOS_SOLICITUD = ['Cliente esperando en mostrador','Se acabó y llegó recién ahora','Reposición para el taller propio','Pedido especial de cliente frecuente','Vi que ya no queda en el sistema'];
+const COMENTARIOS_RECHAZO = ['Ya viene en el sugerido de esta semana — no duplicar.','Hay stock disponible en bodega, coordinar traslado interno.','Cantidad no justificada para la venta reciente, ajustar y reenviar.'];
+const SOLICITUDES = Array.from({length:11}).map((_,i)=>{
+  const candidatas = SUGERIDO.filter(x=>SUCURSALES.find(s=>s.id===x.sucursal)?.taller);
+  const r = pick(candidatas.length?candidatas:SUGERIDO);
+  const estado = i<4?'pendiente':i<8?'aprobada':'rechazada';
+  const comprador = pick(USUARIOS.filter(u=>u.rol==='abastecimiento'));
+  return {
+    id:uid(), producto:r.producto, descripcion:r.descripcion, sucursal:r.sucursal, sucursalNombre:r.sucursalNombre,
+    cantidad: ri(1,15), urgencia: rand()<0.3?'urgente':'normal',
+    motivo: pick(MOTIVOS_SOLICITUD), solicitante:'Pablo Rivas', fecha:new Date(NOW.getTime()-ri(0,10)*86400000),
+    estado, revisadoPor: estado!=='pendiente'?comprador.nombre:null,
+    fechaRevision: estado!=='pendiente'? new Date(NOW.getTime()-ri(0,5)*86400000) : null,
+    comentario: estado==='rechazada'? pick(COMENTARIOS_RECHAZO) : (estado==='aprobada'?'Aprobado — se agrega al próximo carro de compra.':null),
+  };
+}).sort((a,b)=>b.fecha-a.fecha);
+
 // ===================== Auditoría =====================
 const ACCIONES_AUD = ['Creó','Modificó','Eliminó','Carga masiva','Recurrencia+','Recurrencia-','Recurrente auto','Documento+','Abrió documento'];
 const AUDITORIA = Array.from({length:38}).map(()=>{
@@ -615,7 +639,7 @@ function ic(name){
   };
   return `<svg viewBox="0 0 24 24" class="ic">${map[name]||''}</svg>`;
 }
-const NAV_ICON = {'#/':'chart','#/compras':'cart','#/catalogo':'book','#/sugerencias':'clipboard','#/ventas':'history','#/inventario':'boxes','#/simulador':'flask','#/incidencias':'alert','#/auditoria':'file','#/modelo':'layers','#/configuracion':'sliders','#/cargar':'database'};
+const NAV_ICON = {'#/':'chart','#/compras':'cart','#/catalogo':'book','#/solicitudes':'truck','#/sugerencias':'clipboard','#/ventas':'history','#/inventario':'boxes','#/simulador':'flask','#/incidencias':'alert','#/auditoria':'file','#/modelo':'layers','#/configuracion':'sliders','#/cargar':'database'};
 
 /*@@ICONS@@*/
 // ===================== Formato =====================
@@ -631,6 +655,7 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;'
 function badgeAbc(abc){ return `<span class="badge badge-${abc.toLowerCase()}">${abc}</span>`; }
 function badgeOrigen(o){ const map={manual:['MANUAL','badge-info'],instock:['INSTOCK','badge-warn'],catalogo:['CATÁLOGO','badge-neutral'],sugerido:['SUGERIDO','badge-good']}; const t=map[o]||['—','badge-neutral']; return `<span class="badge ${t[1]}">${t[0]}</span>`; }
 function badgeEstadoInc(e){ const map={abierta:['ABIERTA','badge-warn'],revision:['EN REVISIÓN','badge-info'],resuelta:['RESUELTA','badge-good'],descartada:['DESCARTADA','badge-neutral']}; const t=map[e]; return `<span class="badge ${t[1]}">${t[0]}</span>`; }
+function badgeEstadoSolicitud(e){ const map={pendiente:['PENDIENTE','badge-warn'],aprobada:['APROBADA','badge-good'],rechazada:['RECHAZADA','badge-crit']}; const t=map[e]; return `<span class="badge ${t[1]}">${t[0]}</span>`; }
 function badgeTipoSug(t){ const map={mantener:'Mantener stock',cubrir:'Cubrir días',unidades:'Unidades directas'}; return `<span class="chip">${map[t]||t}</span>`; }
 
 // ===================== KPI tiles =====================
@@ -774,20 +799,21 @@ function showToast(msg,type){ type=type||'ok'; const root=document.getElementByI
 /*@@HELPERS@@*/
 // ===================== Navegación =====================
 const NAV = [
-  {href:'#/', label:'Sugerido'},
-  {href:'#/compras', label:'Compras'},
+  {href:'#/', label:'Sugerido', hideVendedor:true},
+  {href:'#/compras', label:'Compras', hideVendedor:true},
   {href:'#/catalogo', label:'Catálogo'},
-  {href:'#/sugerencias', label:'Sugerencias', hideReadOnly:true},
-  {href:'#/ventas', label:'Ventas'},
-  {href:'#/inventario', label:'Inventario'},
+  {href:'#/solicitudes', label:'Solicitudes', hideReadOnly:true},
+  {href:'#/sugerencias', label:'Sugerencias', hideReadOnly:true, hideVendedor:true},
+  {href:'#/ventas', label:'Ventas', hideVendedor:true},
+  {href:'#/inventario', label:'Inventario', hideVendedor:true},
   {href:'#/configuracion', label:'Configuración', onlyCalibra:true},
   {href:'#/incidencias', label:'Incidencias'},
-  {href:'#/auditoria', label:'Auditoría'},
-  {href:'#/modelo', label:'Modelo'},
-  {href:'#/simulador', label:'Simulador'},
+  {href:'#/auditoria', label:'Auditoría', hideVendedor:true},
+  {href:'#/modelo', label:'Modelo', hideVendedor:true},
+  {href:'#/simulador', label:'Simulador', hideVendedor:true},
   {href:'#/cargar', label:'Cargar datos', onlyAdmin:true},
 ];
-function navItems(){ const p=permisos(); return NAV.filter(n=>(!n.onlyAdmin||p.admin)&&(!n.onlyCalibra||p.calibra)&&(!n.hideReadOnly||!p.lectura)); }
+function navItems(){ const p=permisos(); return NAV.filter(n=>(!n.onlyAdmin||p.admin)&&(!n.onlyCalibra||p.calibra)&&(!n.hideReadOnly||!p.lectura)&&(!n.hideVendedor||!p.vendedor)); }
 
 // ===================== Login =====================
 // ===================== Landing (previa al login) =====================
@@ -874,6 +900,7 @@ function viewLanding(){
         <div class="land-map">
           <div>${ic('chart')}<h4>Sugerido diario</h4><p>Qué comprar, cuánto y en qué sucursal, con más de 30 columnas configurables.</p></div>
           <div>${ic('cart')}<h4>Compras por proveedor</h4><p>El sugerido, agrupado y listo para transformarse en orden.</p></div>
+          <div>${ic('truck')}<h4>Solicitudes de sucursal</h4><p>El vendedor pide, abastecimiento aprueba o rechaza.</p></div>
           <div>${ic('book')}<h4>Catálogo y ficha de producto</h4><p>Historial de ventas y stock por sucursal, producto por producto.</p></div>
           <div>${ic('clipboard')}<h4>Sugerencias manuales</h4><p>Ajustes únicos, cargas masivas y reglas recurrentes, con motivo y autor.</p></div>
           <div>${ic('history')}<h4>Ventas históricas</h4><p>Consulta por producto, sucursal y rango de fechas.</p></div>
@@ -887,7 +914,22 @@ function viewLanding(){
           <div>${ic('lock')}<h4>Roles y permisos</h4><p>Administrador, Abastecimiento o Solo lectura — incluso por sucursal.</p></div>
           <div>${ic('msg')}<h4>Asistente con IA</h4><p>Pregunta por stock, ranking o precios en lenguaje natural.</p></div>
           <div>${ic('bell')}<h4>Notificaciones de equipo</h4><p>Avisa de cargas, ajustes e incidencias en tiempo real.</p></div>
-          <div>${ic('star')}<h4>Tutorial guiado</h4><p>Un recorrido paso a paso por toda la plataforma.</p></div>
+          <div style="grid-column:1/-1;">${ic('star')}<h4>Tutorial guiado</h4><p>Un recorrido paso a paso por toda la plataforma.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="land-section">
+      <div class="land-wrap">
+        <div class="land-section__head">
+          <p class="eyebrow kicker" style="color:var(--accent-700);margin-bottom:10px;">Para quién es</p>
+          <h2 class="editorial-rule">De una sucursal a una red completa.</h2>
+          <p>El motor no cambia si hoy tienes un local o doce — solo cambia la escala de la operación.</p>
+        </div>
+        <div class="land-who">
+          <div><h3>Una sucursal, o varias</h3><p>Sirve tanto para un negocio con un solo local como para una red con centro de distribución y reparto entre sucursales.</p></div>
+          <div><h3>Repuestos, retail o distribución</h3><p>Cualquier operación con inventario físico que se agota o se acumula, y donde reponer a tiempo importa.</p></div>
+          <div><h3>Donde el criterio no está escrito</h3><p>Si el "cuánto pedir" depende hoy de una persona o de un Excel que nadie más entiende, es el problema que resolvemos.</p></div>
         </div>
       </div>
     </section>
@@ -896,7 +938,7 @@ function viewLanding(){
       <div class="land-wrap">
         <div class="land-cta">
           <h2>Entra y recorre el flujo completo.</h2>
-          <p>Vas a poder elegir tu rol — Administrador, Abastecimiento o Solo lectura — para ver los permisos en acción. Un tutorial guiado te muestra cada pantalla.</p>
+          <p>Vas a poder elegir tu rol — Administrador, Abastecimiento, Solo lectura o Vendedor de sucursal — para ver los permisos en acción. Un tutorial guiado te muestra cada pantalla.</p>
           <div style="margin-top:22px;"><button class="btn btn-primary" style="background:var(--accent-500);color:var(--ink-900);" onclick="App.goShowLogin()">Entrar a la demo ${ic('arrowright')}</button></div>
         </div>
       </div>
@@ -932,6 +974,7 @@ function viewLogin(){
             <label><input type="radio" name="rol" value="admin" checked onchange="App.setLoginRol(this.value)"/><span>Administrador — acceso total</span></label>
             <label><input type="radio" name="rol" value="abastecimiento" onchange="App.setLoginRol(this.value)"/><span>Abastecimiento — puede calibrar el modelo</span></label>
             <label><input type="radio" name="rol" value="lectura" onchange="App.setLoginRol(this.value)"/><span>Solo lectura — sin sugerencias manuales</span></label>
+            <label><input type="radio" name="rol" value="vendedor" onchange="App.setLoginRol(this.value)"/><span>Vendedor de sucursal — solicita repuestos</span></label>
           </div>
         </div>
         <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" onclick="App.login()">Iniciar sesión ${ic('arrowright')}</button>
@@ -968,7 +1011,7 @@ function shellHTML(inner){
       <div class="topbar__right">
         <span class="syncpill">${ic('dot')} Actualizado hace 2 h</span>
         ${STATE.user.sucursalesPermitidas?`<span class="badge badge-info" title="Este usuario solo ve estas sucursales">${ic('pin')} ${sucursalesVisibles().map(s=>s.nombre).join(', ')}</span>`:''}
-        <button class="iconbtn" style="position:relative" onclick="App.toggleNotif(event)">${ic('bell')}${INCIDENCIAS.filter(i=>i.estado==='abierta').length?`<span style="position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--critical)"></span>`:''}</button>
+        <button class="iconbtn" style="position:relative" onclick="App.toggleNotif(event)">${ic('bell')}${(INCIDENCIAS.filter(i=>i.estado==='abierta').length||(permisos().compra&&SOLICITUDES.some(s=>s.estado==='pendiente')))?`<span style="position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--critical)"></span>`:''}</button>
         <span class="userchip">${esc(STATE.user.nombre)}</span>
         <button class="iconbtn" onclick="App.logout()" title="Cerrar sesión">${ic('logout')}</button>
       </div>
@@ -984,8 +1027,10 @@ function shellHTML(inner){
 function labelRol(r){ return {admin:'Administrador',abastecimiento:'Abastecimiento',lectura:'Solo lectura'}[r]||r; }
 const NOTIF_ACCION_TXT={'Creó':'Creó una sugerencia manual','Modificó':'Modificó una sugerencia','Eliminó':'Eliminó una sugerencia','Carga masiva':'Cargó un lote masivo','Recurrencia+':'Creó una regla recurrente','Recurrencia-':'Eliminó una regla recurrente','Recurrente auto':'Se ejecutó una recurrente','Documento+':'Agregó un documento','Abrió documento':'Abrió un documento'};
 function notifPopHTML(){
+  const p=permisos();
   const items=[
     ...INCIDENCIAS.filter(i=>i.estado==='abierta'||i.estado==='revision').map(i=>({fecha:i.fecha, critica:true, titulo:(i.estado==='abierta'?'Nuevo reporte: ':'En revisión: ')+i.titulo, detalle:i.sucursal})),
+    ...(p.compra? SOLICITUDES.filter(s=>s.estado==='pendiente'&&sucursalPermitida(s.sucursal)).map(s=>({fecha:s.fecha, critica:s.urgencia==='urgente', titulo:'Solicitud'+(s.urgencia==='urgente'?' urgente':'')+': '+s.producto+' — '+s.descripcion, detalle:s.solicitante+' · '+s.sucursalNombre})) : []),
     ...AUDITORIA.filter(a=>sucursalPermitida(SUCURSALES.find(s=>s.nombre===a.sucursal)?.id||'')).slice(0,25).map(a=>({fecha:a.fecha, critica:false, titulo:(NOTIF_ACCION_TXT[a.accion]||a.accion)+' — '+a.producto, detalle:a.usuario+' · '+a.sucursal})),
   ].sort((a,b)=>b.fecha-a.fecha).slice(0,6);
   return `<div class="notif-pop">
@@ -1404,6 +1449,74 @@ function sugRecurrentesHTML(){
     <span class="muted small">última: ${fDate(r.ultima)}</span>
     <button class="iconbtn" onclick="App.eliminarRecurrente('${r.id}')">${ic('trash')}</button>
   </div>`).join('')}</div>`;
+}
+
+// ===================== Vista: Solicitudes de sucursal (vendedor ↔ abastecimiento) =====================
+function viewSolicitudes(){
+  const p=permisos();
+  const tab=STATE.solicitudes.tab;
+  const mias = p.vendedor ? SOLICITUDES.filter(s=>s.solicitante===STATE.user.nombre) : SOLICITUDES.filter(s=>sucursalPermitida(s.sucursal));
+  const contador = e => mias.filter(s=>s.estado===e).length;
+  const lista = mias.filter(s=>s.estado===tab);
+  return `
+  <div class="section-title">
+    <div><h2 class="editorial-rule">${p.vendedor?'Mis solicitudes':'Solicitudes de sucursales'}</h2><p>${p.vendedor?'Pide un repuesto puntual a tu sucursal y sigue el estado de tu solicitud.':'Revisa y responde lo que las sucursales están pidiendo fuera del sugerido automático.'}</p></div>
+    ${p.vendedor?`<button class="btn btn-primary btn-sm" onclick="App.openModalSolicitud()">${ic('plus')} Nueva solicitud</button>`:''}
+  </div>
+  <div class="pill-tabs">
+    <button class="pill-tab ${tab==='pendiente'?'active':''}" onclick="App.setSolicitudTab('pendiente')">Pendientes <span class="count">${contador('pendiente')}</span></button>
+    <button class="pill-tab ${tab==='aprobada'?'active':''}" onclick="App.setSolicitudTab('aprobada')">Aprobadas <span class="count">${contador('aprobada')}</span></button>
+    <button class="pill-tab ${tab==='rechazada'?'active':''}" onclick="App.setSolicitudTab('rechazada')">Rechazadas <span class="count">${contador('rechazada')}</span></button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    ${lista.length? lista.map(s=>solicitudCardHTML(s,p)).join('') : `<div class="card card-pad tbl-empty">No hay solicitudes ${tab==='pendiente'?'pendientes':tab==='aprobada'?'aprobadas':'rechazadas'}.</div>`}
+  </div>`;
+}
+function solicitudCardHTML(s,p){
+  return `<div class="card card-pad">
+    <div class="flex items-center gap8 wrap" style="margin-bottom:6px;">
+      <span class="tabular" style="font-weight:600;">${s.producto}</span>
+      <span style="flex:1;min-width:160px;">${esc(s.descripcion)}</span>
+      ${s.urgencia==='urgente'?'<span class="badge badge-crit">Urgente</span>':''}
+      ${badgeEstadoSolicitud(s.estado)}
+    </div>
+    <div class="flex gap12 wrap small muted" style="margin-bottom:8px;">
+      <span>Cantidad: <b class="tabular" style="color:var(--text-1);">${fNum(s.cantidad)} u</b></span>
+      <span>${esc(s.sucursalNombre)}</span>
+      <span>${esc(s.solicitante)}, ${fDate(s.fecha)}</span>
+    </div>
+    <p class="small" style="color:var(--text-2);margin-bottom:${s.comentario?'8px':'0'};">${esc(s.motivo)}</p>
+    ${s.comentario?`<div class="callout ${s.estado==='rechazada'?'warn':''}" style="margin-bottom:0;">${ic(s.estado==='rechazada'?'alert':'check')}<div><b>${esc(s.revisadoPor)}</b> · ${fDate(s.fechaRevision)} — ${esc(s.comentario)}</div></div>`:''}
+    ${(p.compra && s.estado==='pendiente')?`
+    <div class="flex gap8" style="margin-top:12px;">
+      <button class="btn btn-primary btn-sm" onclick="App.aprobarSolicitud('${s.id}')">${ic('check')} Aprobar</button>
+      <button class="btn btn-danger btn-sm" onclick="App.formRechazarSolicitud('${s.id}')">Rechazar</button>
+    </div>
+    <div id="form-rechazo-${s.id}"></div>`:''}
+  </div>`;
+}
+function modalSolicitudHTML(){
+  const f=STATE.formSolicitud;
+  const sucOpts = sucursalesVisibles().filter(s=>!s.cd);
+  const prodOptions = PRODUCTOS.map(p=>`<option value="${p.codigo}" ${f.producto===p.codigo?'selected':''}>${p.codigo} — ${esc(p.descripcion)}</option>`).join('');
+  return `<div class="modal__head"><h3>Nueva solicitud de repuesto</h3><button class="iconbtn" onclick="App.closeModal()">${ic('x')}</button></div>
+  <div class="modal__body">
+    <div class="modal-grid" style="margin-bottom:14px;">
+      <div class="field"><label>Producto</label><select class="select" onchange="App.setFormSolicitud('producto',this.value)"><option value="">Selecciona…</option>${prodOptions}</select></div>
+      <div class="field"><label>Sucursal</label><select class="select" onchange="App.setFormSolicitud('sucursal',this.value)">${sucOpts.map(s=>`<option value="${s.id}" ${f.sucursal===s.id?'selected':''}>${esc(s.nombre)}</option>`).join('')}</select></div>
+    </div>
+    <div class="modal-grid" style="margin-bottom:14px;">
+      <div class="field"><label>Cantidad</label><input class="input" type="number" min="1" value="${f.cantidad}" onchange="App.setFormSolicitud('cantidad',+this.value)"/></div>
+      <div class="field"><label>Urgencia</label>
+        <div class="radiorow">
+          <div class="radiocard ${f.urgencia==='normal'?'sel':''}" onclick="App.setFormSolicitud('urgencia','normal')">Normal</div>
+          <div class="radiocard ${f.urgencia==='urgente'?'sel':''}" onclick="App.setFormSolicitud('urgencia','urgente')">Urgente</div>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Motivo</label><textarea class="input" rows="3" oninput="App.setFormSolicitud('motivo',this.value)">${esc(f.motivo)}</textarea></div>
+  </div>
+  <div class="modal__foot"><button class="btn btn-ghost" onclick="App.closeModal()">Cancelar</button><button class="btn btn-primary" onclick="App.crearSolicitud()">Enviar solicitud</button></div>`;
 }
 
 // ===================== Vista: Inventario =====================
@@ -1830,6 +1943,8 @@ const STATE = {
   compras:{open:{}},
   catalogo:{q:'',familia:'',soloConStock:true,cols:new Set(CAT_COLS_DEFAULT)},
   sugerencias:{tab:'unicas'},
+  solicitudes:{tab:'pendiente'},
+  formSolicitud:{producto:'',sucursal:'ALT',cantidad:1,urgencia:'normal',motivo:''},
   auditoria:{tab:'actividad'},
   inventario:{umbral:180},
   ventas:{producto:'',sucursal:'',desde:'',hasta:'',resultados:null},
@@ -1837,7 +1952,7 @@ const STATE = {
   configuracion:{form:Object.assign({},CONFIG_MODELO), impacto:null, historialOpen:false, ltDetalleOpen:false},
   cargar:{estadoSync:'ok', resultado:null, motorAbierto:false},
 };
-function permisos(){ const r=STATE.rol; return { admin:r==='admin', calibra:r==='admin'||r==='abastecimiento', lectura:r==='lectura' }; }
+function permisos(){ const r=STATE.rol; return { admin:r==='admin', calibra:r==='admin'||r==='abastecimiento', lectura:r==='lectura', vendedor:r==='vendedor', compra:r==='admin'||r==='abastecimiento' }; }
 function sucursalesVisibles(){ const p=STATE.user&&STATE.user.sucursalesPermitidas; return p ? SUCURSALES.filter(s=>p.includes(s.id)) : SUCURSALES; }
 function sucursalPermitida(id){ const p=STATE.user&&STATE.user.sucursalesPermitidas; return !p || p.includes(id); }
 
@@ -1849,6 +1964,7 @@ function parseRoute(){
   if(segs[0]==='catalogo') return segs[1]? {name:'catalogo-detalle',codigo:segs[1]} : {name:'catalogo'};
   if(segs[0]==='producto') return {name:'producto-detalle', codigo:segs[1], sucursal:segs[2]};
   if(segs[0]==='sugerencias') return {name:'sugerencias'};
+  if(segs[0]==='solicitudes') return {name:'solicitudes'};
   if(segs[0]==='ventas') return {name:'ventas'};
   if(segs[0]==='inventario') return {name:'inventario'};
   if(segs[0]==='simulador') return {name:'simulador'};
@@ -1862,21 +1978,25 @@ function parseRoute(){
 function viewNoAutorizado(){ return `<div class="card card-pad tbl-empty">${ic('lock')}<p style="margin-top:10px;">No tienes permiso para ver esta sección con el rol actual.</p></div>`; }
 function contentForRoute(){
   const r=parseRoute();
+  const v=permisos().vendedor;
   switch(r.name){
-    case 'compras': STATE.route='#/compras'; return viewCompras();
+    case 'compras': STATE.route='#/compras'; return v?viewNoAutorizado():viewCompras();
     case 'catalogo': STATE.route='#/catalogo'; return viewCatalogo();
     case 'catalogo-detalle': STATE.route='#/catalogo'; return viewCatalogoDetalle(r.codigo);
-    case 'producto-detalle': STATE.route='#/'; return viewProductoDetalle(r.codigo, r.sucursal);
-    case 'sugerencias': STATE.route='#/sugerencias'; return permisos().lectura? viewNoAutorizado() : viewSugerencias();
-    case 'ventas': STATE.route='#/ventas'; return viewVentas();
-    case 'inventario': STATE.route='#/inventario'; return viewInventario();
-    case 'simulador': STATE.route='#/simulador'; return viewSimulador();
+    case 'producto-detalle': STATE.route='#/'; return v?viewNoAutorizado():viewProductoDetalle(r.codigo, r.sucursal);
+    case 'sugerencias': STATE.route='#/sugerencias'; return (permisos().lectura||v)? viewNoAutorizado() : viewSugerencias();
+    case 'solicitudes': STATE.route='#/solicitudes'; return permisos().lectura? viewNoAutorizado() : viewSolicitudes();
+    case 'ventas': STATE.route='#/ventas'; return v?viewNoAutorizado():viewVentas();
+    case 'inventario': STATE.route='#/inventario'; return v?viewNoAutorizado():viewInventario();
+    case 'simulador': STATE.route='#/simulador'; return v?viewNoAutorizado():viewSimulador();
     case 'incidencias': STATE.route='#/incidencias'; return viewIncidencias();
-    case 'auditoria': STATE.route='#/auditoria'; return viewAuditoria();
-    case 'modelo': STATE.route='#/modelo'; return viewModelo();
+    case 'auditoria': STATE.route='#/auditoria'; return v?viewNoAutorizado():viewAuditoria();
+    case 'modelo': STATE.route='#/modelo'; return v?viewNoAutorizado():viewModelo();
     case 'configuracion': STATE.route='#/configuracion'; return permisos().calibra? viewConfiguracion() : viewNoAutorizado();
     case 'cargar': STATE.route='#/cargar'; return permisos().admin? viewCargar() : viewNoAutorizado();
-    default: STATE.route='#/'; return viewDashboard();
+    default:
+      if(v){ STATE.route='#/solicitudes'; return viewSolicitudes(); }
+      STATE.route='#/'; return viewDashboard();
   }
 }
 function render(){
@@ -1990,9 +2110,9 @@ const App = {
     const rol=STATE.pendingRol||'admin';
     const user=USUARIOS.find(u=>u.email.toLowerCase()===email) || USUARIOS.find(u=>u.rol===rol) || USUARIOS[0];
     STATE.auth=true; STATE.user=user; STATE.rol=rol;
-    location.hash='#/'; render();
+    location.hash= rol==='vendedor' ? '#/solicitudes' : '#/'; render();
     showToast('Bienvenida/o, '+user.nombre.split(' ')[0]+'.');
-    if(!STATE.tour.visto) setTimeout(()=>App.startTour(), 900);
+    if(!STATE.tour.visto && rol!=='vendedor') setTimeout(()=>App.startTour(), 900);
   },
   logout(){ STATE.auth=false; STATE.user=null; STATE.sidebarOpen=false; STATE.notifOpen=false; STATE.chatOpen=false; render(); },
   // Shell
@@ -2125,6 +2245,40 @@ const App = {
   },
   eliminarRecurrente(id){ const i=RECURRENTES.findIndex(r=>r.id===id); if(i>=0) RECURRENTES.splice(i,1); showToast('Regla recurrente eliminada.'); render(); },
   setSugTab(t){ STATE.sugerencias.tab=t; render(); },
+  // Solicitudes de sucursal (vendedor) y aprobación (abastecimiento)
+  setSolicitudTab(t){ STATE.solicitudes.tab=t; render(); },
+  openModalSolicitud(){
+    const sucDefault=(STATE.user.sucursalesPermitidas&&STATE.user.sucursalesPermitidas[0])||'ALT';
+    STATE.formSolicitud={producto:'',sucursal:sucDefault,cantidad:1,urgencia:'normal',motivo:''};
+    openModal(modalSolicitudHTML());
+  },
+  setFormSolicitud(k,v){ STATE.formSolicitud[k]=v; if(k!=='motivo') openModal(modalSolicitudHTML()); },
+  crearSolicitud(){
+    const f=STATE.formSolicitud;
+    if(!f.producto){ showToast('Selecciona un producto.','err'); return; }
+    const prod=PRODUCTOS.find(p=>p.codigo===f.producto);
+    const suc=SUC_BY_ID[f.sucursal];
+    SOLICITUDES.unshift({id:uid(), producto:f.producto, descripcion:prod.descripcion, sucursal:f.sucursal, sucursalNombre:suc.nombre, cantidad:f.cantidad, urgencia:f.urgencia, motivo:f.motivo||'Sin motivo especificado', solicitante:STATE.user.nombre, fecha:new Date(NOW), estado:'pendiente', revisadoPor:null, fechaRevision:null, comentario:null});
+    closeModal(); showToast('Solicitud enviada a abastecimiento.'); render();
+  },
+  aprobarSolicitud(id){
+    const s=SOLICITUDES.find(x=>x.id===id); if(!s) return;
+    s.estado='aprobada'; s.revisadoPor=STATE.user.nombre; s.fechaRevision=new Date(NOW); s.comentario='Aprobado — se agrega al próximo carro de compra.';
+    const nueva={id:uid(), producto:s.producto, descripcion:s.descripcion, sucursal:s.sucursal, sucursalNombre:s.sucursalNombre, cantidad:s.cantidad, tipo:'unidades', motivo:'Solicitud de '+s.solicitante+' ('+s.sucursalNombre+') aprobada por '+STATE.user.nombre, autor:STATE.user.nombre, fecha:new Date(NOW), vence:null, lote:null};
+    SUG_INDIVIDUALES.unshift(nueva); ALL_MANUALES.unshift(nueva);
+    showToast('Solicitud aprobada y agregada al sugerido.'); render();
+  },
+  formRechazarSolicitud(id){
+    const el=document.getElementById('form-rechazo-'+id); if(!el) return;
+    el.innerHTML=`<div style="margin-top:10px;"><textarea class="input" rows="2" id="rech-${id}" placeholder="Explica por qué se rechaza…" style="width:100%;"></textarea><button class="btn btn-danger btn-sm" style="margin-top:6px;" onclick="App.rechazarSolicitud('${id}')">Confirmar rechazo</button></div>`;
+  },
+  rechazarSolicitud(id){
+    const texto=(document.getElementById('rech-'+id).value||'').trim();
+    if(!texto){ showToast('Escribe un motivo de rechazo.','err'); return; }
+    const s=SOLICITUDES.find(x=>x.id===id); if(!s) return;
+    s.estado='rechazada'; s.revisadoPor=STATE.user.nombre; s.fechaRevision=new Date(NOW); s.comentario=texto;
+    showToast('Solicitud rechazada.'); render();
+  },
   // Incidencias
   openModalIncidencia(codigo,sucursal,pantalla){
     STATE.formInc={titulo:'',descripcion:'',producto:codigo||'',sucursal:sucursal||'',pantalla:pantalla||'Incidencias'};
