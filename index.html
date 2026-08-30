@@ -952,6 +952,12 @@ function viewLanding(){
   </div>`;
 }
 
+const ROL_DESC = {
+  admin: 'Acceso completo: el sugerido, compras, catálogo, inventario, ventas, simulador, configuración del modelo, auditoría y carga de datos. Es la vista de quien lidera el área de abastecimiento.',
+  abastecimiento: 'Ve y ajusta el sugerido, revisa y aprueba (o rechaza) lo que las sucursales solicitan, y puede calibrar los parámetros del modelo. No tiene acceso a la carga de datos.',
+  lectura: 'Puede consultar el sugerido, el catálogo, las ventas y el inventario, pero no crea sugerencias manuales ni aprueba solicitudes — pensado para quien solo necesita mirar.',
+  vendedor: 'Una vista acotada a su propia sucursal: catálogo, incidencias y, sobre todo, pedir un repuesto puntual para que abastecimiento lo apruebe o lo rechace.',
+};
 function viewLogin(){
   return `<div class="login-wrap">
     <div class="login-left">
@@ -980,6 +986,7 @@ function viewLogin(){
             <label><input type="radio" name="rol" value="lectura" onchange="App.setLoginRol(this.value)"/><span>Solo lectura — sin sugerencias manuales</span></label>
             <label><input type="radio" name="rol" value="vendedor" onchange="App.setLoginRol(this.value)"/><span>Vendedor de sucursal — solicita repuestos</span></label>
           </div>
+          <div id="login-rol-desc" class="preview-box flex gap8" style="margin-top:10px;font-size:12.5px;align-items:flex-start;"><span style="color:var(--brand);flex-shrink:0;margin-top:1px;">${ic('info')}</span><span>${esc(ROL_DESC.admin)}</span></div>
         </div>
         <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" onclick="App.login()">Iniciar sesión ${ic('arrowright')}</button>
         <p class="login-foot">${esc(EMPRESA.nombre)} — demo de producto, datos ficticios</p>
@@ -2121,6 +2128,8 @@ const App = {
     const u=USUARIOS.find(x=>x.rol===r);
     const emailInput=document.getElementById('login-email');
     if(u && emailInput) emailInput.value=u.email;
+    const descEl=document.getElementById('login-rol-desc');
+    if(descEl) descEl.lastElementChild.textContent=ROL_DESC[r]||'';
   },
   goShowLogin(){ STATE.showLogin=true; render(); window.scrollTo(0,0); },
   backToLanding(){ STATE.showLogin=false; render(); window.scrollTo(0,0); },
