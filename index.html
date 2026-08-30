@@ -265,6 +265,9 @@ table.tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;}
 .callout{display:flex;gap:10px;padding:12px 14px;border-radius:4px;border:1px solid var(--border);background:var(--surface-2);font-size:13px;color:var(--text-2);}
 .callout .ic{flex-shrink:0;margin-top:1px;color:var(--brand);}
 .callout.warn{background:var(--accent-50);border-color:var(--accent-100);} .callout.warn .ic{color:var(--accent-600);}
+.callout-sell{display:flex;gap:11px;padding:13px 16px;border-radius:4px;background:var(--accent-50);border-left:3px solid var(--accent-500);font-size:13px;color:var(--text-2);margin-bottom:18px;line-height:1.5;}
+.callout-sell .ic{flex-shrink:0;margin-top:2px;color:var(--accent-600);}
+.callout-sell b{color:var(--text-1);}
 
 .formula{font-family:var(--font-mono);background:var(--ink-900);color:var(--paper-100);padding:12px 16px;border-radius:4px;font-size:13px;overflow-x:auto;}
 .toc{position:sticky;top:80px;}
@@ -764,6 +767,7 @@ function lineChart(series, opts={}){
   </svg>`;
 }
 function progressBar(pct,color){ return `<div class="progress"><div class="progress__bar" style="width:${Math.min(100,Math.max(0,pct)).toFixed(0)}%;background:${color||'var(--brand)'}"></div></div>`; }
+function sellCallout(html){ return `<div class="callout-sell">${ic('star')}<div>${html}</div></div>`; }
 
 // ===================== Tabla genérica ordenable + paginada =====================
 function tableState(id){ if(!STATE.tables[id]) STATE.tables[id]={sort:null,dir:1,page:1}; return STATE.tables[id]; }
@@ -1126,6 +1130,7 @@ function viewDashboard(){
       ${permisos().lectura?'':`<button class="btn btn-primary btn-sm" data-tour="btn-sugerencia" onclick="App.openModalSugerencia()">${ic('plus')} Sugerencia manual</button>`}
     </div>
   </div>
+  ${sellCallout('Esta es la pantalla que hoy reemplazas con un Excel o un tablero de Power BI: <b>cada mañana el sistema recalcula cuánto comprar</b> de cada producto, en cada sucursal, sin que nadie tenga que armarlo a mano.')}
   ${permisos().admin?pillTabsVista():''}
   <div id="dash-kpis">${dashKpisHTML()}</div>
   <div class="card card-pad" style="margin-bottom:16px;">
@@ -1191,6 +1196,7 @@ function viewCompras(){
   <div class="section-title"><div><h2 class="editorial-rule">Carros de compra</h2><p>El sugerido agrupado por proveedor, listo para generar la orden. La cantidad ya descuenta el traslado desde el CD y los ajustes manuales vigentes.</p></div>
     <button class="btn btn-primary btn-sm" onclick="App.exportar('todas las órdenes de compra')">${ic('download')} Exportar todas las órdenes</button>
   </div>
+  ${sellCallout('El mismo sugerido del dashboard, pero ya <b>agrupado por proveedor</b> y con la cantidad neta calculada. Desde acá se exporta la orden — no hay que copiar y pegar entre planillas para armarla.')}
   ${kpiGrid([{label:'Proveedores',value:fNum(carros.length),icon:'truck'},{label:'Unidades a comprar',value:fNum(totalUnidades)+' u',icon:'boxes'},{label:'Valor total',value:fCLP(totalValor),icon:'chart'}])}
   <div style="display:flex;flex-direction:column;gap:10px;">${carros.map(c=>comprasCarroHTML(c)).join('')}</div>`;
 }
@@ -1254,6 +1260,7 @@ function viewCatalogo(){
   <div class="section-title"><div><h2 class="editorial-rule">Catálogo</h2><p>Maestro completo de productos, independiente de si están en el sugerido activo.</p></div>
     <button class="btn btn-outline btn-sm" onclick="App.rerender()">${ic('refresh')} Actualizar</button>
   </div>
+  ${sellCallout('El maestro completo de productos — <b>exista o no sugerido hoy</b>. Reemplaza la ficha técnica que hoy vive repartida entre el ERP y la memoria del equipo. Haz clic en cualquier fila para ver su ficha completa.')}
   <div class="toolbar">
     <div class="searchbox">${ic('search')}<input class="input" placeholder="Buscar código o descripción…" value="${esc(f.q)}" oninput="App.setCatFiltro('q',this.value)"/></div>
     <select class="select" onchange="App.setCatFiltro('familia',this.value)">
@@ -1278,6 +1285,7 @@ function viewCatalogoDetalle(codigo){
   <div class="section-title"><div><p class="kicker">${esc(b.categoria)} · ${b.nacional?'Nacional':'Importado'}</p><h2 class="tabular" style="font-size:22px;">${codigo}</h2><p>${esc(b.descripcion)}</p></div>
     <div class="flex gap8"><a class="btn btn-outline btn-sm" href="#/catalogo">← Volver</a>${permisos().lectura?'':`<button class="btn btn-primary btn-sm" onclick="App.openModalSugerencia('${codigo}')">${ic('plus')} Sugerencia manual</button>`}</div>
   </div>
+  ${sellCallout('La ficha maestra de este producto, <b>independiente de si hoy tiene sugerido activo</b> — costo, precio, stock por sucursal y su historial de ventas, en un solo lugar.')}
   <div class="kpi-grid" style="margin-bottom:20px;">
     ${kpiTile(1,'Stock total', fNum(stockTotal)+' u')}
     ${kpiTile(2,'Familia', b.categoria)}
@@ -1310,6 +1318,7 @@ function viewProductoDetalle(codigo, sucId){
     <div><div class="flex items-center gap8" style="margin-bottom:6px;"><span class="tabular" style="font-size:20px;font-weight:600;">${codigo}</span>${badgeAbc(row.abc)}<span class="badge badge-neutral">${esc(row.proveedor)}</span><span class="badge badge-info">${esc(row.sucursalNombre)}</span></div><p>${esc(row.descripcion)}</p></div>
     <div class="flex gap8"><a class="btn btn-outline btn-sm" href="#/">← Volver</a><button class="btn btn-outline btn-sm" onclick="App.openModalIncidencia('${codigo}','${esc(row.sucursalNombre)}','Detalle de producto')">${ic('alert')} Reportar problema</button></div>
   </div>
+  ${sellCallout('Esta ficha responde la pregunta que hoy nadie puede responder rápido: <b>por qué se sugiere esta cantidad</b>, con la demanda, el stock, el lead time y el margen que la explican — todo junto, sin pedirle nada a nadie.')}
 
   <div class="grid-3" style="margin-bottom:16px;">
     <div class="card card-pad">
@@ -1397,6 +1406,7 @@ function viewSugerencias(){
   const totalUnicas=SUG_INDIVIDUALES.length+LOTES.reduce((a,l)=>a+l.filas.length,0);
   return `
   <div class="section-title"><div><h2 class="editorial-rule">Sugerencias manuales</h2><p>Ajustes hechos a mano sobre el sugerido del sistema, únicos o recurrentes.</p></div></div>
+  ${sellCallout('Cuando el sistema no basta y el equipo necesita ajustar a mano, <b>queda declarado acá</b> — con motivo, autor y fecha de vencimiento. Nada se pierde en un chat.')}
   <div class="pill-tabs">
     <button class="pill-tab ${tab==='unicas'?'active':''}" onclick="App.setSugTab('unicas')">Únicas <span class="count">${totalUnicas}</span></button>
     <button class="pill-tab ${tab==='recurrentes'?'active':''}" onclick="App.setSugTab('recurrentes')">Recurrentes <span class="count">${RECURRENTES.length}</span></button>
@@ -1463,6 +1473,7 @@ function viewSolicitudes(){
     <div><h2 class="editorial-rule">${p.vendedor?'Mis solicitudes':'Solicitudes de sucursales'}</h2><p>${p.vendedor?'Pide un repuesto puntual a tu sucursal y sigue el estado de tu solicitud.':'Revisa y responde lo que las sucursales están pidiendo fuera del sugerido automático.'}</p></div>
     ${p.vendedor?`<button class="btn btn-primary btn-sm" onclick="App.openModalSolicitud()">${ic('plus')} Nueva solicitud</button>`:''}
   </div>
+  ${sellCallout(p.vendedor?'Antes esto se pedía por WhatsApp o llamada y se perdía apenas se cerraba el chat. Ahora queda <b>registrado, con fecha</b>, y puedes ver en qué quedó tu pedido.':'Cada solicitud pendiente <b>te llega como notificación</b>. Al aprobar, se suma automáticamente al sugerido — no hay que ingresarla dos veces en ningún otro sistema.')}
   <div class="pill-tabs">
     <button class="pill-tab ${tab==='pendiente'?'active':''}" onclick="App.setSolicitudTab('pendiente')">Pendientes <span class="count">${contador('pendiente')}</span></button>
     <button class="pill-tab ${tab==='aprobada'?'active':''}" onclick="App.setSolicitudTab('aprobada')">Aprobadas <span class="count">${contador('aprobada')}</span></button>
@@ -1551,6 +1562,7 @@ function viewInventario(){
       <button class="btn btn-outline btn-sm" onclick="App.rerender()">${ic('refresh')} Actualizar</button>
     </div>
   </div>
+  ${sellCallout('Los <b>dos problemas que más plata cuestan</b>, en la misma pantalla: cuánto capital está inmovilizado en sobre-stock, y dónde hay riesgo real de quedarse sin stock — antes de que se convierta en una venta perdida.')}
   ${kpiGrid([
     {label:'Valor del inventario', value:fCLP(valorTotal), icon:'boxes'},
     {label:'Inmovilizado', value:fCLP(inmovilizado), sub:fPct(inmovilizado/valorTotal*100)+' del valor', icon:'alert'},
@@ -1571,6 +1583,7 @@ function viewVentas(){
   const f=STATE.ventas; const res=f.resultados;
   return `
   <div class="section-title"><div><h2 class="editorial-rule">Ventas históricas</h2><p>Consulta desde 2018 — ${fNum(48200+SUGERIDO.length*37)} registros disponibles.</p></div></div>
+  ${sellCallout('El historial completo de ventas, <b>consultable por cualquiera del equipo</b> sin pedirle el archivo a nadie. Es el mismo dato que alimenta el cálculo de demanda del sugerido.')}
   <div class="toolbar">
     <div class="field"><label>Producto</label><input class="input" id="vh-producto" placeholder="Código o descripción" value="${esc(f.producto)}"/></div>
     <div class="field"><label>Sucursal</label><select class="select" id="vh-sucursal"><option value="">Todas</option>${sucursalesVisibles().filter(s=>!s.cd).map(s=>`<option value="${s.id}" ${f.sucursal===s.id?'selected':''}>${s.nombre}</option>`).join('')}</select></div>
@@ -1597,6 +1610,7 @@ function viewSimulador(){
   const res=STATE.simulador.result;
   return `
   <div class="section-title"><div><h2 class="editorial-rule">Simulador what-if</h2><p>Prueba otros parámetros del modelo sin afectar el sugerido real. No persiste nada.</p></div></div>
+  ${sellCallout('Antes de cambiar una política real, <b>se prueba acá el impacto en pesos</b> — cuánto sube o baja la compra, y en cuántas líneas — sin arriesgar el sugerido que ya está en producción.')}
   <div class="card card-pad" style="margin-bottom:16px;">
     <div class="modal-grid" style="margin-bottom:14px;">
       <div class="field"><label>Ciclo de orden compra directa (días)</label><input class="input" type="number" id="sim-cicloDirecto" value="${f.cicloDirecto}"/></div>
@@ -1634,6 +1648,7 @@ function viewIncidencias(){
   <div class="section-title"><div><h2 class="editorial-rule">Mesa de soporte</h2><p>${p.admin?`${INCIDENCIAS.length} reportes · ${sinCerrar} sin cerrar`:'Tus reportes'}</p></div>
     <div class="flex gap8"><button class="btn btn-outline btn-sm" onclick="App.rerender()">${ic('refresh')} Actualizar</button><button class="btn btn-primary btn-sm" onclick="App.openModalIncidencia()">${ic('plus')} Reportar problema</button></div>
   </div>
+  ${sellCallout('Cuando un número no cuadra, se reporta acá — con el producto y la pantalla ya adjuntos — y <b>queda con respuesta</b>, en vez de perderse en un correo o un pasillo.')}
   <div style="display:flex;flex-direction:column;gap:10px;">${INCIDENCIAS.map(i=>incidenciaCardHTML(i)).join('')}</div>`;
 }
 function incidenciaCardHTML(i){
@@ -1661,6 +1676,7 @@ function viewAuditoria(){
   const p=permisos(); const tab=STATE.auditoria.tab;
   return `
   <div class="section-title"><div><h2 class="editorial-rule">Auditoría</h2><p>Trazabilidad de cambios sobre el sugerido.</p></div><button class="btn btn-outline btn-sm" onclick="App.rerender()">${ic('refresh')} Actualizar</button></div>
+  ${sellCallout('El registro completo de <b>quién cambió qué y por qué</b>. Para cuando alguien pregunte, seis meses después, por qué se compró algo — la respuesta está acá, no en la memoria de nadie.')}
   ${p.admin?`<div class="pill-tabs"><button class="pill-tab ${tab==='actividad'?'active':''}" onclick="App.setAudTab('actividad')">Actividad</button><button class="pill-tab ${tab==='accesos'?'active':''}" onclick="App.setAudTab('accesos')">Accesos</button></div>`:''}
   ${(tab==='accesos'&&p.admin)?auditoriaAccesosHTML():auditoriaActividadHTML()}`;
 }
@@ -1682,6 +1698,7 @@ function viewConfiguracion(){
   const f=STATE.configuracion.form;
   return `
   <div class="section-title"><div><h2 class="editorial-rule">Calibración del modelo</h2><p>Ajusta los parámetros del motor de cálculo por módulos, y revisa el impacto antes de aplicar.</p></div></div>
+  ${sellCallout('Estos son los parámetros del motor — <b>ajustables por el propio equipo de abastecimiento</b>, sin depender de un desarrollador ni de una nueva versión del sistema. "Ver impacto" muestra el efecto en pesos antes de guardar.')}
   <div class="callout" style="margin-bottom:16px;">${ic('info')}<div>Editado por <b>${esc(CONFIG_MODELO.editadoPor)}</b> el ${fDate(CONFIG_MODELO.editadoFecha)}.</div></div>
 
   <div class="card card-pad" style="margin-bottom:14px;">
@@ -1749,6 +1766,7 @@ function viewCargar(){
   const s=STATE.cargar;
   return `
   <div class="section-title"><div><h2 class="editorial-rule">Cargar datos</h2><p>El motor recalcula automáticamente todos los días a las 10:00 AM.</p></div></div>
+  ${sellCallout('Todo se mantiene sincronizado <b>solo, todos los días</b>, sin que nadie tenga que acordarse de correr nada. Si algo falla, hay un botón de respaldo para forzar la actualización o cargar un Excel a mano.')}
   <div class="card card-pad" style="margin-bottom:16px;">
     <div class="flex items-center" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <div><p class="kicker">Sincronización</p><p style="margin:4px 0 0;">Última actualización: <b>${fRel(new Date(NOW.getTime()-2*3600000))}</b></p></div>
@@ -1788,6 +1806,7 @@ function viewModelo(){
   const prioridad = PRIORIDAD_CD.map(id=>SUC_BY_ID[id].nombre);
   return `
   <div class="section-title"><div><h2 class="editorial-rule">Cómo se calcula el sugerido</h2><p>Documentación viva del modelo, en el mismo orden en que corre el motor.</p></div><button class="btn btn-outline btn-sm" onclick="App.exportarModelo()">${ic('download')} Exportar a Word</button></div>
+  ${sellCallout('Ninguna fórmula es una caja negra: cada paso del cálculo está documentado acá, en el mismo orden en que corre el motor. <b>Cualquiera del equipo puede auditarlo</b>, no solo quien lo programó.')}
   <div style="display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:start;">
     <nav class="toc">${secciones.map(s=>`<a href="#modelo-${s[0]}">${esc(s[1])}</a>`).join('')}</nav>
     <div style="max-width:760px;">
