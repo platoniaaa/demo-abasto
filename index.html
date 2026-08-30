@@ -1478,7 +1478,7 @@ function viewSolicitudes(){
   return `
   <div class="section-title">
     <div><h2 class="editorial-rule">${p.vendedor?'Mis solicitudes':'Solicitudes de sucursales'}</h2><p>${p.vendedor?'Pide un repuesto puntual a tu sucursal y sigue el estado de tu solicitud.':'Revisa y responde lo que las sucursales están pidiendo fuera del sugerido automático.'}</p></div>
-    ${p.vendedor?`<button class="btn btn-primary btn-sm" onclick="App.openModalSolicitud()">${ic('plus')} Nueva solicitud</button>`:''}
+    ${p.vendedor?`<button class="btn btn-primary btn-sm" data-tour="btn-nueva-solicitud" onclick="App.openModalSolicitud()">${ic('plus')} Nueva solicitud</button>`:''}
   </div>
   ${sellCallout(p.vendedor?'Antes esto se pedía por WhatsApp o llamada y se perdía apenas se cerraba el chat. Ahora queda <b>registrado, con fecha</b>, y puedes ver en qué quedó tu pedido.':'Cada solicitud pendiente <b>te llega como notificación</b>. Al aprobar, se suma automáticamente al sugerido — no hay que ingresarla dos veces en ningún otro sistema.')}
   <div class="pill-tabs">
@@ -2048,20 +2048,53 @@ function catalogoTableHTML(){
 }
 
 // ===================== Tutorial interactivo =====================
-const TOUR_STEPS = [
-  {kind:'intro', title:'Bienvenido a Abasto', text:'En un minuto te mostramos cómo decide, todos los días, qué comprar en cada sucursal.'},
-  {route:'#/', selector:'.kpi-grid', title:'El sugerido de hoy', text:'Cuatro números resumen la mañana: cuánto comprar, por cuánto dinero, en cuántos productos y con cuántos proveedores.'},
-  {route:'#/', selector:'.toolbar', title:'Filtra en vivo', text:'Busca por texto o activa "solo pedir" y "solo nacionales" — la tabla y los gráficos se actualizan al instante, sin recargar nada.'},
-  {route:'#/', selector:'#dash-table', title:'Cada fila, una decisión', text:'Producto y sucursal. Haz clic en cualquiera para ver el cálculo completo: demanda, stock, lead time y por qué se sugiere esa cantidad.'},
-  {route:'#/', selector:'[data-tour="btn-columnas"]', title:'Tantas columnas como necesites', text:'Más de 30 columnas disponibles — stock, márgenes, lead time — organizadas por tema. Cada usuario arma su propia vista.'},
-  {route:'#/', selector:'[data-tour="btn-sugerencia"]', title:'Cuando el criterio humano manda', text:'Un ajuste manual, con motivo y fecha de vencimiento — no una instrucción que se pierde en un chat.'},
-  {route:'#/compras', selector:'main.content .card', title:'Listo para comprar', text:'El sugerido ya agrupado por proveedor. Se revisa y se exporta como orden — sin pasar por Excel.'},
-  {route:'#/catalogo', selector:'#cat-table', title:'El maestro completo', text:'Todo el catálogo, tenga o no sugerido activo hoy. Cada producto tiene su propia ficha con historial de ventas y stock por sucursal.'},
-  {route:'#/inventario', selector:'.kpi-grid', title:'Los dos lados del problema', text:'Cuánta plata está inmovilizada en sobre-stock, y dónde hay riesgo real de quiebre — en la misma pantalla.'},
-  {route:'#/configuracion', selector:'main.content .card', title:'El motor, a tu medida', text:'Stock de seguridad, lead time, clasificación ABC — cada parámetro se puede ajustar, con el impacto medido antes de aplicar.'},
-  {route:'#/auditoria', selector:'.table-wrap', title:'Nada se pierde', text:'Quién cambió qué, cuándo y por qué. Cada ajuste manual, cada carga masiva, cada recurrente — todo con fecha y autor.'},
-  {kind:'outro', title:'Eso es Abasto', text:'Sigue explorando la demo a tu ritmo, o conversemos sobre tu operación.'},
-];
+const TOUR_STEPS_BY_ROL = {
+  admin: [
+    {kind:'intro', title:'Bienvenido a Abasto', text:'Como administrador ves todo. En un par de minutos te mostramos cómo decide el sistema, todos los días, qué comprar en cada sucursal.'},
+    {route:'#/', selector:'.kpi-grid', title:'El sugerido de hoy', text:'Cuatro números resumen la mañana: cuánto comprar, por cuánto dinero, en cuántos productos y con cuántos proveedores.'},
+    {route:'#/', selector:'.toolbar', title:'Filtra en vivo', text:'Busca por texto o activa "solo pedir" y "solo nacionales" — la tabla y los gráficos se actualizan al instante, sin recargar nada.'},
+    {route:'#/', selector:'#dash-table', title:'Cada fila, una decisión', text:'Producto y sucursal. Haz clic en cualquiera para ver el cálculo completo: demanda, stock, lead time y por qué se sugiere esa cantidad.'},
+    {route:'#/', selector:'[data-tour="btn-columnas"]', title:'Tantas columnas como necesites', text:'Más de 30 columnas disponibles — stock, márgenes, lead time — organizadas por tema. Cada usuario arma su propia vista.'},
+    {route:'#/', selector:'[data-tour="btn-sugerencia"]', title:'Cuando el criterio humano manda', text:'Un ajuste manual, con motivo y fecha de vencimiento — no una instrucción que se pierde en un chat.'},
+    {route:'#/compras', selector:'main.content .card', title:'Listo para comprar', text:'El sugerido ya agrupado por proveedor. Se revisa y se exporta como orden — sin pasar por Excel.'},
+    {route:'#/solicitudes', selector:'.pill-tabs', title:'Lo que piden las sucursales', text:'Cada solicitud puntual de una sucursal llega acá para que la apruebes o la rechaces — con trazabilidad completa.'},
+    {route:'#/catalogo', selector:'#cat-table', title:'El maestro completo', text:'Todo el catálogo, tenga o no sugerido activo hoy. Cada producto tiene su propia ficha con historial de ventas y stock por sucursal.'},
+    {route:'#/inventario', selector:'.kpi-grid', title:'Los dos lados del problema', text:'Cuánta plata está inmovilizada en sobre-stock, y dónde hay riesgo real de quiebre — en la misma pantalla.'},
+    {route:'#/configuracion', selector:'main.content .card', title:'El motor, a tu medida', text:'Stock de seguridad, lead time, clasificación ABC — cada parámetro se puede ajustar, con el impacto medido antes de aplicar.'},
+    {route:'#/cargar', selector:'main.content .card', title:'Solo tú ves esto', text:'La carga y sincronización de datos es exclusiva del administrador — el resto del equipo ni siquiera ve esta pantalla en el menú.'},
+    {route:'#/auditoria', selector:'.table-wrap', title:'Nada se pierde', text:'Quién cambió qué, cuándo y por qué. Cada ajuste manual, cada carga masiva, cada solicitud aprobada — todo con fecha y autor.'},
+    {kind:'outro', title:'Eso es Abasto', text:'Sigue explorando la demo a tu ritmo, o conversemos sobre tu operación.'},
+  ],
+  abastecimiento: [
+    {kind:'intro', title:'Tu día a día en Abasto', text:'Como abastecimiento, esto es lo que vas a usar todos los días: el sugerido, las solicitudes de las sucursales, y el modelo que puedes calibrar tú mismo.'},
+    {route:'#/', selector:'.kpi-grid', title:'El sugerido de hoy', text:'Cuánto comprar, por cuánto dinero, en cuántos productos y con cuántos proveedores — recalculado esta madrugada.'},
+    {route:'#/', selector:'[data-tour="btn-sugerencia"]', title:'Ajusta cuando haga falta', text:'Cuando tu criterio tiene algo que decir, el ajuste queda declarado acá — con motivo y fecha, no en un chat.'},
+    {route:'#/solicitudes', selector:'.pill-tabs', title:'Aprueba lo que piden las sucursales', text:'Cada vendedor de sucursal puede pedirte un repuesto puntual. Acá decides: aprobar (se suma solo al sugerido) o rechazar con un comentario.'},
+    {route:'#/compras', selector:'main.content .card', title:'Genera la orden', text:'El sugerido ya agrupado por proveedor, listo para exportar como orden de compra.'},
+    {route:'#/inventario', selector:'.kpi-grid', title:'Dónde está la plata', text:'Sobre-stock inmovilizado y riesgo de quiebre, por sucursal — los dos números que más te van a preguntar.'},
+    {route:'#/simulador', selector:'.card', title:'Prueba antes de aplicar', text:'¿Y si subo el nivel de servicio de la clase A? Acá se ve el impacto en pesos, sin tocar el sugerido real.'},
+    {route:'#/configuracion', selector:'main.content .card', title:'Calibra el modelo tú mismo', text:'Stock de seguridad, lead time, clasificación ABC — parámetros que ajustas tú, sin pedirle nada a TI.'},
+    {kind:'outro', title:'Eso es tu Abasto', text:'Sigue explorando a tu ritmo, o conversemos sobre cómo se ajustaría a tu operación.'},
+  ],
+  lectura: [
+    {kind:'intro', title:'Tu vista en Abasto', text:'Con este rol ves todo lo que te corresponde — sin riesgo de tocar algo por accidente. Te mostramos qué puedes consultar.'},
+    {route:'#/', selector:'.kpi-grid', title:'El sugerido, siempre a la vista', text:'El mismo número que usa el equipo de abastecimiento para decidir, disponible para ti en tiempo real.'},
+    {route:'#/', selector:'.toolbar', title:'Busca y filtra libremente', text:'Puedes filtrar por texto, por sucursal o por proveedor — la consulta es tuya, sin permiso de nadie.'},
+    {route:'#/catalogo', selector:'#cat-table', title:'El catálogo completo', text:'Historial de ventas y stock por sucursal de cualquier producto, con solo un clic.'},
+    {route:'#/ventas', selector:'.toolbar', title:'Ventas históricas', text:'Consulta el histórico desde 2018 por producto, sucursal o rango de fechas — y descárgalo si lo necesitas.'},
+    {route:'#/inventario', selector:'.kpi-grid', title:'Visibilidad total del inventario', text:'Sobre-stock y riesgo de quiebre, exactamente igual que los ve abastecimiento.'},
+    {kind:'outro', title:'Eso es lo que ves', text:'Todo esto, sin poder alterar nada — ideal para gerencia, finanzas o auditoría externa que solo necesita mirar.'},
+  ],
+  vendedor: [
+    {kind:'intro', title:'Tu Abasto es simple', text:'Como vendedor de sucursal, tu mundo se reduce a lo esencial: consultar y pedir lo que falta.'},
+    {route:'#/solicitudes', selector:'[data-tour="btn-nueva-solicitud"]', title:'Pide lo que falta', text:'Antes esto era una llamada o un WhatsApp que se perdía. Ahora tu pedido queda registrado, con fecha, para que abastecimiento lo revise.'},
+    {route:'#/solicitudes', selector:'.pill-tabs', title:'Sigue el estado de tu pedido', text:'Pendiente, aprobada o rechazada — con el comentario de quien la revisó. Nunca más te quedas sin saber qué pasó.'},
+    {route:'#/catalogo', selector:'#cat-table', title:'Consulta antes de pedir', text:'Revisa el stock y el historial de ventas de un producto antes de solicitarlo — para no duplicar un pedido que ya viene en camino.'},
+    {route:'#/incidencias', selector:'main.content .card', title:'Si algo no cuadra', text:'¿Un número no te calza? Repórtalo acá y queda con respuesta — no se pierde en un pasillo.'},
+    {kind:'outro', title:'Eso es todo lo que necesitas', text:'Simple y rápido, sin perderte en pantallas de abastecimiento que no te sirven.'},
+  ],
+};
+function currentTourSteps(){ return TOUR_STEPS_BY_ROL[STATE.rol] || TOUR_STEPS_BY_ROL.admin; }
 function tourRoot(){ return document.getElementById('tour-root'); }
 function tourClear(){ const r=tourRoot(); if(r) r.innerHTML=''; }
 function tourRenderCenter(step){
@@ -2140,7 +2173,7 @@ const App = {
     STATE.auth=true; STATE.user=user; STATE.rol=rol;
     location.hash= rol==='vendedor' ? '#/solicitudes' : '#/'; render();
     showToast('Bienvenida/o, '+user.nombre.split(' ')[0]+'.');
-    if(!STATE.tour.visto && rol!=='vendedor') setTimeout(()=>App.startTour(), 900);
+    if(!STATE.tour.visto) setTimeout(()=>App.startTour(), 900);
   },
   logout(){ STATE.auth=false; STATE.user=null; STATE.sidebarOpen=false; STATE.notifOpen=false; STATE.chatOpen=false; render(); },
   // Shell
@@ -2464,19 +2497,20 @@ const App = {
     App.tourRenderCurrent();
   },
   tourRenderCurrent(){
-    const step=TOUR_STEPS[STATE.tour.step];
+    const steps=currentTourSteps();
+    const step=steps[STATE.tour.step];
     if(!step){ App.tourEnd(); return; }
     if(step.kind==='intro'||step.kind==='outro'){ tourRenderCenter(step); return; }
     if(step.route && STATE.route!==step.route){
       location.hash=step.route;
-      setTimeout(()=>tourRenderSpotlight(step, STATE.tour.step+1, TOUR_STEPS.length), 140);
+      setTimeout(()=>tourRenderSpotlight(step, STATE.tour.step+1, steps.length), 140);
     } else {
-      tourRenderSpotlight(step, STATE.tour.step+1, TOUR_STEPS.length);
+      tourRenderSpotlight(step, STATE.tour.step+1, steps.length);
     }
   },
   tourNext(){
     STATE.tour.step++;
-    if(STATE.tour.step>=TOUR_STEPS.length){ App.tourEnd(); return; }
+    if(STATE.tour.step>=currentTourSteps().length){ App.tourEnd(); return; }
     App.tourRenderCurrent();
   },
   tourPrev(){ STATE.tour.step=Math.max(0,STATE.tour.step-1); App.tourRenderCurrent(); },
@@ -2485,8 +2519,9 @@ const App = {
 window.App = App;
 window.addEventListener('resize', ()=>{
   if(!STATE.tour.active) return;
-  const step=TOUR_STEPS[STATE.tour.step];
-  if(step && step.selector) tourRenderSpotlight(step, STATE.tour.step+1, TOUR_STEPS.length);
+  const steps=currentTourSteps();
+  const step=steps[STATE.tour.step];
+  if(step && step.selector) tourRenderSpotlight(step, STATE.tour.step+1, steps.length);
 });
 
 // ===================== Init =====================
